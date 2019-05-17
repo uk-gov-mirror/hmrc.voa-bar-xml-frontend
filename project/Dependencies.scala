@@ -7,8 +7,8 @@ object Dependencies {
 
   private val playHealthVersion = "3.9.0-play-25"
   private val logbackJsonLoggerVersion = "4.2.0"
-  private val govukTemplateVersion = "5.27.0-play-25"
-  private val playUiVersion = "7.31.0-play-25"
+  private val govukTemplateVersion = "5.35.0-play-25"
+  private val playUiVersion = "7.39.0-play-25"
   private val hmrcTestVersion = "3.4.0-play-25"
   private val scalaTestVersion = "3.0.4"
   private val scalaTestPlusPlayVersion = "2.0.1"
