@@ -23,8 +23,8 @@ class UnauthorisedViewSpec extends ViewBehaviours:
 
   private val unauthorised = inject[unauthorised]
 
-  private def view = () => unauthorised()(using fakeRequest, messages)
+  private def view = () => unauthorised()(using getRequest, messages)
 
-  "Unauthorised view" must {
+  "Unauthorised view" should {
     behave like normalPage(view, "unauthorised")
   }

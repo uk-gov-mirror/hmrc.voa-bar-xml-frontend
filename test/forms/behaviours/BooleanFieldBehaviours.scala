@@ -23,12 +23,12 @@ trait BooleanFieldBehaviours extends FieldBehaviours:
   def booleanField(form: Form[?], fieldName: String, invalidError: FormError): Unit =
     "bind true" in {
       val result = form.bind(Map(fieldName -> "true"))
-      result.value.value shouldBe true
+      result.value.get shouldBe true
     }
 
     "bind false" in {
       val result = form.bind(Map(fieldName -> "false"))
-      result.value.value shouldBe false
+      result.value.get shouldBe false
     }
 
     "not bind non-booleans" in

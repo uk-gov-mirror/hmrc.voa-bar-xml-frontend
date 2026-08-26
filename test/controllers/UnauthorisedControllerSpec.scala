@@ -25,14 +25,14 @@ class UnauthorisedControllerSpec extends ControllerSpecBase:
   private def controllerComponents = inject[MessagesControllerComponents]
   private val unauthorised         = inject[unauthorised]
 
-  "Unauthorised Controller" must {
+  "UnauthorisedController" should {
     "return 200 for a GET" in {
-      val result = UnauthorisedController(controllerComponents, unauthorised).onPageLoad()(fakeRequest)
-      status(result) mustBe OK
+      val result = UnauthorisedController(controllerComponents, unauthorised).onPageLoad()(getRequest)
+      status(result) shouldBe OK
     }
 
     "return the correct view for a GET" in {
-      val result = UnauthorisedController(controllerComponents, unauthorised).onPageLoad()(fakeRequest)
-      contentAsString(result) mustBe unauthorised()(using fakeRequest, messages).toString
+      val result = UnauthorisedController(controllerComponents, unauthorised).onPageLoad()(getRequest)
+      contentAsString(result) shouldBe unauthorised()(using getRequest, messages).toString
     }
   }

@@ -23,24 +23,21 @@ import models.requests.DataRequest
 import models.Login
 import play.api.Configuration
 import play.api.i18n.MessagesApi
-import play.api.mvc.{AnyContent, BodyParsers, MessagesControllerComponents}
+import play.api.mvc.{AnyContent, MessagesControllerComponents}
 import play.api.test.Helpers.*
-import play.api.test.Injecting
+import play.api.test.Helpers
 import uk.gov.hmrc.http.SessionKeys
 import utils.UserAnswers
 import views.ViewSpecBase
 import views.html.{error_template, reportReason}
 
-import scala.concurrent.ExecutionContext
-
-class ReportReasonControllerSpec extends ControllerSpecBase with ViewSpecBase with Injecting:
+class ReportReasonControllerSpec extends ControllerSpecBase with ViewSpecBase:
 
   private val sessionId = "session-id"
   private val username  = "BA1445"
-  private val ec        = inject[ExecutionContext]
 
   private def reportReasonController() =
-    val dataRetrievalAction = DataRetrievalActionImpl(FakeDataCacheConnector2, inject[BodyParsers.Default])(using ec)
+    val dataRetrievalAction = DataRetrievalActionImpl(FakeDataCacheConnector2, stubControllerComponents())(using ec)
 
     FakeDataCacheConnector2.resetCaptures()
     FakeDataCacheConnector2.save[String](sessionId, VOAuthorisedId.toString, username)
@@ -60,23 +57,22 @@ class ReportReasonControllerSpec extends ControllerSpecBase with ViewSpecBase wi
 
   private def viewAsString() = inject[reportReason]
 
-  "ReportReasonController" must {
-
+  "ReportReasonController" should {
     "return OK and the correct view for a GET" in {
-      val req = fakeRequest.withSession(SessionKeys.sessionId -> sessionId)
+      val req = getRequest.withSession(SessionKeys.sessionId -> sessionId)
 
       val result = reportReasonController().onPageLoad()(req)
-      status(result) mustBe OK
+      status(result) shouldBe OK
 
       val dataRequest = DataRequest[AnyContent](req, sessionId, UserAnswers(FakeDataCacheConnector2.fetchMap(sessionId)))
-      contentAsString(result) mustBe viewAsString()(ReportReasonController.form, true)(using dataRequest, inject[MessagesApi].preferred(req)).toString
+      contentAsString(result) shouldBe viewAsString()(ReportReasonController.form, true)(using dataRequest, inject[MessagesApi].preferred(req)).toString
     }
 
     "return redirect on successful form submission" in {
-      val req = fakeRequest.withMethod("POST").withSession(SessionKeys.sessionId -> sessionId)
+      val req = postRequest.withSession(SessionKeys.sessionId -> sessionId)
         .withFormUrlEncodedBody("reportReason" -> "AddProperty")
 
       val result = reportReasonController().onPageSubmit(req)
-      status(result) mustBe SEE_OTHER
+      status(result) shouldBe SEE_OTHER
     }
   }

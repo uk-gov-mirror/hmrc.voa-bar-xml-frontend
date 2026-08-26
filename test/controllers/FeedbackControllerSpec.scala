@@ -16,43 +16,27 @@
 
 package controllers
 
-import connectors.{AuditService, RequestBuilderStub}
+import connectors.AuditService
 import forms.FeedbackForm.feedbackForm
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.mvc.MessagesControllerComponents
 import play.api.test.Helpers.*
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import views.html.feedback.{feedback, feedbackError, feedbackThx}
-
-import java.net.URL
-import scala.concurrent.ExecutionContext
 
 /**
   * @author Yuriy Tumakha
   */
-class FeedbackControllerSpec extends ControllerSpecBase with MockitoSugar:
+class FeedbackControllerSpec extends ControllerSpecBase:
 
-  private val ec                   = inject[ExecutionContext]
   private val controllerComponents = inject[MessagesControllerComponents]
-  private val servicesConfig       = inject[ServicesConfig]
   private val auditService         = inject[AuditService]
   private val feedbackView         = inject[feedback]
   private val feedbackThxView      = inject[feedbackThx]
   private val feedbackErrorView    = inject[feedbackError]
 
-  private val httpClientV2Mock = mock[HttpClientV2]
-  when(
-    httpClientV2Mock.post(any[URL])(using any[HeaderCarrier])
-  ).thenReturn(RequestBuilderStub(Right(OK), "OK"))
-
   private val feedbackController = FeedbackController(
     servicesConfig,
     auditService,
-    httpClientV2Mock,
+    httpClientMock(POST, responseBody = "OK"),
     feedbackView,
     feedbackThxView,
     feedbackErrorView,
@@ -61,37 +45,39 @@ class FeedbackControllerSpec extends ControllerSpecBase with MockitoSugar:
 
   "FeedbackController" should {
     "return feedback page when requested" in {
-      val result = feedbackController.onPageLoad()(fakeRequest)
+      val result = feedbackController.onPageLoad()(getRequest)
 
-      status(result) mustBe OK
-      contentAsString(result) mustBe feedbackView(feedbackForm)(using fakeRequest, messages).toString
+      status(result)          shouldBe OK
+      contentAsString(result) shouldBe feedbackView(feedbackForm)(using getRequest, messages).toString
     }
 
     "return 303 redirect for valid form data" in {
-      val result = feedbackController.onPageSubmit()(fakeRequest.withMethod("POST")
-        .withFormUrlEncodedBody("feedback-rating" -> "5"))
+      val result = feedbackController.onPageSubmit()(
+        postRequest.withFormUrlEncodedBody("feedback-rating" -> "5")
+      )
 
-      status(result) mustBe SEE_OTHER
+      status(result) shouldBe SEE_OTHER
     }
 
     "return 400 Bad Request for invalid form data" in {
-      val result = feedbackController.onPageSubmit()(fakeRequest.withMethod("POST")
-        .withFormUrlEncodedBody("foo" -> "bar"))
+      val result = feedbackController.onPageSubmit()(
+        postRequest.withFormUrlEncodedBody("foo" -> "bar")
+      )
 
-      status(result) mustBe BAD_REQUEST
+      status(result) shouldBe BAD_REQUEST
     }
 
     "be able to display thank you page" in {
-      val result = feedbackController.feedbackThx(fakeRequest)
+      val result = feedbackController.feedbackThx(getRequest)
 
-      status(result) mustBe OK
-      contentAsString(result) mustBe feedbackThxView()(using fakeRequest, messages).toString
+      status(result)          shouldBe OK
+      contentAsString(result) shouldBe feedbackThxView()(using getRequest, messages).toString
     }
 
     "be able to display error page" in {
-      val result = feedbackController.feedbackError(fakeRequest)
+      val result = feedbackController.feedbackError(getRequest)
 
-      status(result) mustBe OK
-      contentAsString(result) mustBe feedbackErrorView()(using fakeRequest, messages).toString
+      status(result)          shouldBe OK
+      contentAsString(result) shouldBe feedbackErrorView()(using getRequest, messages).toString
     }
   }

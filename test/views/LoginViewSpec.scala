@@ -29,11 +29,11 @@ class LoginViewSpec extends QuestionViewBehaviours[Login]:
 
   override val form: Form[Login] = LoginFormProvider()()
 
-  private def createView = () => login(form, NormalMode)(using fakeRequest, messages)
+  private def createView = () => login(form, NormalMode)(using getRequest, messages)
 
-  private def createViewUsingForm = (form: Form[Login]) => login(form, NormalMode)(using fakeRequest, messages)
+  private def createViewUsingForm = (form: Form[Login]) => login(form, NormalMode)(using getRequest, messages)
 
-  "Login view" must {
+  "Login view" should {
 
     behave like normalPage(createView, messageKeyPrefix)
     behave like pageWithTextFields(createViewUsingForm, "username", "password")

@@ -16,23 +16,24 @@
 
 package utils
 
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.must
+import uk.gov.hmrc.vo.unit.test.BaseSpec
 
 import java.time.{ZoneId, ZonedDateTime}
 
-class DateFormatterSpec extends AnyFlatSpec with must.Matchers:
+class DateFormatterSpec extends BaseSpec:
 
-  "DateFormatter" should "format date" in {
-    val dateTime = ZonedDateTime.of(
-      2020,
-      10,
-      1,
-      10,
-      0,
-      0,
-      0,
-      ZoneId.of("Europe/London")
-    )
-    DateFormatter.formatDate(dateTime) mustBe "01 October 2020 at 10:00"
+  "DateFormatter" should {
+    "format date" in {
+      val dateTime = ZonedDateTime.of(
+        2020,
+        10,
+        1,
+        10,
+        0,
+        0,
+        0,
+        ZoneId.of("Europe/London")
+      )
+      DateFormatter.formatDate(dateTime) shouldBe "01 October 2020 at 10:00"
+    }
   }

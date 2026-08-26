@@ -16,41 +16,40 @@
 
 package journey
 
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should
-import org.scalatest.prop.TableDrivenPropertyChecks
 import play.api.libs.json.{JsString, Json}
+import uk.gov.hmrc.vo.unit.test.BaseSpec
 import utils.ReflectionUtil
 
-class NoPlanningReferenceTypeSpec extends AnyFlatSpec with should.Matchers with TableDrivenPropertyChecks:
+class NoPlanningReferenceTypeSpec extends BaseSpec:
 
-  "NoPlanningReferenceType" should "have all instance in Lister for to render radio buttons in order" in {
+  "NoPlanningReferenceType" should {
+    "have all instance in Lister for to render radio buttons in order" in {
+      ReflectionUtil.findAllSubTypeNames[NoPlanningReferenceType] should contain theSameElementsAs NoPlanningReferenceType.order
+    }
 
-    ReflectionUtil.findAllSubTypeNames[NoPlanningReferenceType] should contain theSameElementsAs NoPlanningReferenceType.order
+    "deserialize" in
+      List(
+        "WithoutPlanningPermission",
+        "NotApplicablePlanningPermission",
+        "NotRequiredPlanningPermission",
+        "PermittedDevelopment",
+        "NoPlanningApplicationSubmitted"
+      ).foreach { planningPermission =>
+        val json     = JsString(planningPermission)
+        val jsResult = Json.fromJson(json)(using NoPlanningReferenceType.format)
+        jsResult.isSuccess shouldBe true
+        val noPlanningReferenceType = jsResult.get
+        noPlanningReferenceType.toString shouldBe planningPermission
+      }
+
+    "serialize" in
+      List(
+        WithoutPlanningPermission,
+        NotApplicablePlanningPermission,
+        NotRequiredPlanningPermission,
+        PermittedDevelopment,
+        NoPlanningApplicationSubmitted
+      ).foreach { noPlanningPermission =>
+        Json.toJson(noPlanningPermission)(using NoPlanningReferenceType.format) shouldBe JsString(noPlanningPermission.toString)
+      }
   }
-
-  it should "deserialize" in
-    List(
-      "WithoutPlanningPermission",
-      "NotApplicablePlanningPermission",
-      "NotRequiredPlanningPermission",
-      "PermittedDevelopment",
-      "NoPlanningApplicationSubmitted"
-    ).foreach { planningPermission =>
-      val json     = JsString(planningPermission)
-      val jsResult = Json.fromJson(json)(using NoPlanningReferenceType.format)
-      jsResult.isSuccess shouldBe true
-      val noPlanningReferenceType = jsResult.get
-      noPlanningReferenceType.toString shouldBe planningPermission
-    }
-
-  it should "serialize" in
-    List(
-      WithoutPlanningPermission,
-      NotApplicablePlanningPermission,
-      NotRequiredPlanningPermission,
-      PermittedDevelopment,
-      NoPlanningApplicationSubmitted
-    ).foreach { noPlanningPermission =>
-      Json.toJson(noPlanningPermission)(using NoPlanningReferenceType.format) shouldBe JsString(noPlanningPermission.toString)
-    }

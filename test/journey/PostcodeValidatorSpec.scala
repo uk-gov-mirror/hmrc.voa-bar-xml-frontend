@@ -17,31 +17,31 @@
 package journey
 
 import ltbs.uniform.ErrorTree
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should
-import org.scalatest.EitherValues
+import uk.gov.hmrc.vo.unit.test.BaseSpec
 
-class PostcodeValidatorSpec extends AnyFlatSpec with should.Matchers with EitherValues:
+class PostcodeValidatorSpec extends BaseSpec:
 
   private val validator = PostcodeValidator
 
-  "Postcode validator" should "validate valid postcode" in {
-    validator("BN12 4AX").toEither.value shouldBe "BN12 4AX"
-  }
+  "Postcode validator" should {
+    "validate valid postcode" in {
+      validator("BN12 4AX").toEither.value shouldBe "BN12 4AX"
+    }
 
-  it should "strip not postcode characters and format postcode" in {
-    validator("-- B N1   2 4A  X  ").toEither.value     shouldBe "BN12 4AX"
-    validator("-(&^^%*$&%^#- BN12 4A x").toEither.value shouldBe "BN12 4AX"
-    validator("bn124ax:").toEither.value                shouldBe "BN12 4AX"
-    validator("e2-6b J:").toEither.value                shouldBe "E2 6BJ"
-    validator("e2-6b,. J:").toEither.value              shouldBe "E2 6BJ"
-  }
+    "strip not postcode characters and format postcode" in {
+      validator("-- B N1   2 4A  X  ").toEither.value     shouldBe "BN12 4AX"
+      validator("-(&^^%*$&%^#- BN12 4A x").toEither.value shouldBe "BN12 4AX"
+      validator("bn124ax:").toEither.value                shouldBe "BN12 4AX"
+      validator("e2-6b J:").toEither.value                shouldBe "E2 6BJ"
+      validator("e2-6b,. J:").toEither.value              shouldBe "E2 6BJ"
+    }
 
-  it should "reject invalid postcode" in {
-    validator("1112 4AX").toEither.left.value  shouldBe a[ErrorTree]
-    validator("bn12 4axx").toEither.left.value shouldBe a[ErrorTree]
-  }
+    "reject invalid postcode" in {
+      validator("1112 4AX").toEither.left.value  shouldBe a[ErrorTree]
+      validator("bn12 4axx").toEither.left.value shouldBe a[ErrorTree]
+    }
 
-  it should "reject empty postcode" in {
-    validator("").toEither.left.value shouldBe a[ErrorTree]
+    "reject empty postcode" in {
+      validator("").toEither.left.value shouldBe a[ErrorTree]
+    }
   }

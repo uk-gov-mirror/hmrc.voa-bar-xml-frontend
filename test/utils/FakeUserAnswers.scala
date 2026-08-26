@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package views
+package utils
 
-import views.behaviours.ViewBehaviours
+import models.{CacheMap, Login}
 
-class SessionTimeoutViewSpec extends ViewBehaviours with ViewSpecBase:
-
-  private def sessionTimeout = inject[views.html.session_timeout]
-
-  private def view = () => sessionTimeout()(using getRequest, messages)
-
-  "Session Timeout view" should {
-    behave like normalPage(view, "sessionTimeout", "heading", "copy", "link")
-  }
+/**
+  * @author Yuriy Tumakha
+  */
+class FakeUserAnswers(
+  loginValue: Login,
+  cacheMap: CacheMap = CacheMap("", Map())
+) extends UserAnswers(cacheMap):
+  override def login: Option[Login] = Some(loginValue)

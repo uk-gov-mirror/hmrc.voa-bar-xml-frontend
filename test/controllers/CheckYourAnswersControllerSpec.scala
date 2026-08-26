@@ -21,11 +21,8 @@ import controllers.actions.{DataRequiredActionImpl, DataRetrievalAction}
 import play.api.mvc.MessagesControllerComponents
 import viewmodels.AnswerSection
 
-import scala.concurrent.ExecutionContext
-
 class CheckYourAnswersControllerSpec extends ControllerSpecBase:
 
-  private def ec                   = inject[ExecutionContext]
   private def controllerComponents = inject[MessagesControllerComponents]
   private def checkYourAnswerView  = inject[views.html.check_your_answers]
 
@@ -38,17 +35,17 @@ class CheckYourAnswersControllerSpec extends ControllerSpecBase:
       controllerComponents
     )
 
-  "Check Your Answers Controller" must {
+  "Check Your Answers Controller" should {
     "return 200 and the correct view for a GET" in {
-      val result = controller().onPageLoad()(fakeRequest)
-      status(result) mustBe OK
-      contentAsString(result) mustBe checkYourAnswerView(Seq(AnswerSection(None, Seq())))(using fakeRequest, messages).toString
+      val result = controller().onPageLoad()(getRequest)
+      status(result)          shouldBe OK
+      contentAsString(result) shouldBe checkYourAnswerView(Seq(AnswerSection(None, Seq())))(using getRequest, messages).toString
     }
 
     "redirect to Session Expired for a GET if not existing data is found" in {
-      val result = controller(dontGetAnyData).onPageLoad()(fakeRequest)
+      val result = controller(dontGetAnyData).onPageLoad()(getRequest)
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad.url)
+      status(result)           shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.SessionExpiredController.onPageLoad.url)
     }
   }

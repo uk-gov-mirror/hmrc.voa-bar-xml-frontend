@@ -16,16 +16,18 @@
 
 package models
 
-import org.scalatestplus.play.PlaySpec
+import uk.gov.hmrc.vo.unit.test.BaseSpec
 
-class ErrorSpec extends PlaySpec:
+class ErrorSpec extends BaseSpec:
 
   private val code       = "code1"
   private val errorValue = Seq("testing error")
 
   val error = Error(code, errorValue)
 
-  "Given an error code and an error value produce an Error model" in {
-    error.code mustBe code
-    error.values mustBe errorValue
+  "Error model" should {
+    "given an error code and an error value produce an Error model" in {
+      error.code   shouldBe code
+      error.values shouldBe errorValue
+    }
   }

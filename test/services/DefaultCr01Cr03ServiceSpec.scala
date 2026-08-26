@@ -21,23 +21,20 @@ import journey.AddProperty
 import journey.UniformJourney.{Address, ContactDetails, Cr01Cr03Submission, Cr05Submission}
 import models.{Login, ReportStatus}
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{verify, when}
-import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.JsString
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.vo.unit.test.BaseSpec
 
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class DefaultCr01Cr03ServiceSpec extends PlaySpec with MockitoSugar:
+class DefaultCr01Cr03ServiceSpec extends BaseSpec:
 
   private val BA_REF = "BA2020"
 
   "DefaultCr01Cr03ServiceSpec" should {
-    "Create CR05 report and store in backend" in {
+    "create CR05 report and store in backend" in {
       val connector = mock[ReportStatusConnector]
       when(connector.save(any[ReportStatus], any[Login])(using any[HeaderCarrier])).thenReturn(Future.successful(Right(())))
 
@@ -50,12 +47,12 @@ class DefaultCr01Cr03ServiceSpec extends PlaySpec with MockitoSugar:
 
       verify(connector).save(captor, any[Login])(using any[HeaderCarrier])
 
-      captor.getValue must not be null
-      captor.getValue.baCode.value mustBe BA_REF
-      captor.getValue.report.value.value.get("type").value mustBe JsString("Cr05Submission")
+      captor.getValue                            should not be null
+      captor.getValue.baCode.get               shouldBe BA_REF
+      captor.getValue.report.get.value("type") shouldBe JsString("Cr05Submission")
     }
 
-    "Create CR01 and CR03 report and store in backend" in {
+    "create CR01 and CR03 report and store in backend" in {
       val connector = mock[ReportStatusConnector]
       when(connector.save(any[ReportStatus], any[Login])(using any[HeaderCarrier])).thenReturn(Future.successful(Right(())))
 
@@ -84,9 +81,8 @@ class DefaultCr01Cr03ServiceSpec extends PlaySpec with MockitoSugar:
 
       verify(connector).save(captor, any[Login])(using any[HeaderCarrier])
 
-      captor.getValue must not be null
-      captor.getValue.baCode.value mustBe BA_REF
-      captor.getValue.report.value.value.get("type").value mustBe JsString("Cr01Cr03Submission")
+      captor.getValue                            should not be null
+      captor.getValue.baCode.get               shouldBe BA_REF
+      captor.getValue.report.get.value("type") shouldBe JsString("Cr01Cr03Submission")
     }
-
   }

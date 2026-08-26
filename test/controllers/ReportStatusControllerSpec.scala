@@ -20,10 +20,8 @@ import connectors.{FakeDataCacheConnector, ReportStatusConnector}
 import controllers.actions.*
 import identifiers.LoginId
 import models.*
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{when, withSettings}
+import org.mockito.Mockito.withSettings
 import org.mockito.quality.Strictness
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.Json
 import play.api.mvc.MessagesControllerComponents
 import play.api.test.Helpers.*
@@ -32,11 +30,10 @@ import uk.gov.hmrc.http.HeaderCarrier
 import views.{TableFormatter, ViewSpecBase}
 
 import java.time.Instant
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.util.Success
 
-class ReportStatusControllerSpec extends ControllerSpecBase with ViewSpecBase with MockitoSugar:
+class ReportStatusControllerSpec extends ControllerSpecBase with ViewSpecBase:
 
   implicit class NormalizedInstant(instant: Instant):
     def normalize: Instant = Instant.ofEpochMilli(instant.toEpochMilli)
@@ -99,47 +96,46 @@ class ReportStatusControllerSpec extends ControllerSpecBase with ViewSpecBase wi
       fakeTableFormatter
     )
 
-  private def viewAsString() = reportStatus(username, fakeReports, fakeTableFormatter)(using fakeRequest, messages).toString
+  private def viewAsString() = reportStatus(username, fakeReports, fakeTableFormatter)(using getRequest, messages).toString
 
-  "ReportStatus Controller" must {
-
+  "ReportStatus Controller" should {
     "return OK and the correct view for a GET" in {
-      val result = loggedInController(getEmptyCacheMap).onPageLoad()(fakeRequest)
+      val result = loggedInController(getEmptyCacheMap).onPageLoad()(getRequest)
 
-      status(result) mustBe OK
-      contentAsString(result) mustBe viewAsString()
+      status(result)          shouldBe OK
+      contentAsString(result) shouldBe viewAsString()
     }
 
-    "if not authorized by VO must go to the login page" in {
-      val result = notLoggedInController().onPageLoad()(fakeRequest)
+    "if not authorized by VO should go to the login page" in {
+      val result = notLoggedInController().onPageLoad()(getRequest)
 
       def onwardRoute = routes.LoginController.onPageLoad(NormalMode)
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(onwardRoute.url)
+      status(result)           shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(onwardRoute.url)
     }
 
-    "Given some Json representing a Report Status result, the verify response method creates a Right(Map[String, List[ReportStatus])" in {
+    "given some Json representing a Report Status result, the verify response method creates a Right(Map[String, List[ReportStatus])" in {
       val result = loggedInController(getEmptyCacheMap).verifyResponse(fakeMapAsJson)
 
-      result.isRight mustBe true
-      result.toOption mustBe Some(fakeReports)
+      result.isRight  shouldBe true
+      result.toOption shouldBe Some(fakeReports)
     }
 
-    "Give some wrong Json, the verify response method returns a Left representing the exception to be thrown at Runtime" in {
+    "give some wrong Json, the verify response method returns a Left representing the exception to be thrown at Runtime" in {
       val result = loggedInController(getEmptyCacheMap).verifyResponse(wrongJson)
 
-      result.isLeft mustBe true
-      result mustBe Left("Unable to parse the response from the Report Status Connector")
+      result.isLeft shouldBe true
+      result        shouldBe Left("Unable to parse the response from the Report Status Connector")
     }
 
-    "Throw a runtime exception when the received json value from the Report Status Connector cannot be parsed to a Map[String, List[ReportStatus]]" in
+    "throw a runtime exception when the received json value from the Report Status Connector cannot be parsed to a Map[String, List[ReportStatus]]" in
       intercept[Exception] {
-        val result = loggedInController(getEmptyCacheMap).onPageLoad()(fakeRequest)
-        status(result) mustBe INTERNAL_SERVER_ERROR
+        val result = loggedInController(getEmptyCacheMap).onPageLoad()(getRequest)
+        status(result) shouldBe INTERNAL_SERVER_ERROR
       }
 
-    "Throw a runtime exception when  the Report Status returns an exception" in {
+    "throw a runtime exception when  the Report Status returns an exception" in {
       val reportStatusConnectorMock = mock[ReportStatusConnector](withSettings.strictness(Strictness.LENIENT))
       when(reportStatusConnectorMock.save(any[ReportStatus], any[Login])(using any[HeaderCarrier])).thenReturn(Future(Right(())))
 
@@ -157,8 +153,8 @@ class ReportStatusControllerSpec extends ControllerSpecBase with ViewSpecBase wi
         )
 
       intercept[Exception] {
-        val result = controller.onPageLoad()(fakeRequest)
-        status(result) mustBe INTERNAL_SERVER_ERROR
+        val result = controller.onPageLoad()(getRequest)
+        status(result) shouldBe INTERNAL_SERVER_ERROR
       }
     }
 
@@ -181,9 +177,9 @@ class ReportStatusControllerSpec extends ControllerSpecBase with ViewSpecBase wi
           fakeTableFormatter
         )
 
-      val result = controller.onReceiptDownload(submissionId1)(fakeRequest)
+      val result = controller.onReceiptDownload(submissionId1)(getRequest)
 
-      status(result) mustBe OK
+      status(result) shouldBe OK
     }
 
     "return OK when trying to download all the report statuses" in {
@@ -205,9 +201,9 @@ class ReportStatusControllerSpec extends ControllerSpecBase with ViewSpecBase wi
           fakeTableFormatter
         )
 
-      val result = controller.onAllReceiptsDownload()(fakeRequest)
+      val result = controller.onAllReceiptsDownload()(getRequest)
 
-      status(result) mustBe OK
+      status(result) shouldBe OK
     }
 
     "return 500 when trying to download all the report statuses" in {
@@ -229,8 +225,8 @@ class ReportStatusControllerSpec extends ControllerSpecBase with ViewSpecBase wi
           fakeTableFormatter
         )
 
-      val result = controller.onAllReceiptsDownload()(fakeRequest)
+      val result = controller.onAllReceiptsDownload()(getRequest)
 
-      status(result) mustBe INTERNAL_SERVER_ERROR
+      status(result) shouldBe INTERNAL_SERVER_ERROR
     }
   }

@@ -16,9 +16,9 @@
 
 package models
 
-import base.SpecBase
+import uk.gov.hmrc.vo.unit.test.BaseSpec
 
-class BillingAuthoritiesSpec extends SpecBase:
+class BillingAuthoritiesSpec extends BaseSpec:
 
   private val existingBaCode    = "BA0230"
   private val nonExistingBaCode = "ba9999"
@@ -28,33 +28,32 @@ class BillingAuthoritiesSpec extends SpecBase:
   private val Waveney           = "ba3535"
   private val BAMapSize         = 350
 
-  "BillingAuthorities" must {
-
-    "Return the name of the Billing Authority for an existing Billing Authority Code" in {
-      BillingAuthorities.find(existingBaCode) mustBe Some("Luton")
+  "BillingAuthorities" should {
+    "return the name of the Billing Authority for an existing Billing Authority Code" in {
+      BillingAuthorities.find(existingBaCode) shouldBe Some("Luton")
     }
 
-    "Return None if no baCode is found related to the given code even if the user is logged in" in {
-      BillingAuthorities.find(nonExistingBaCode) mustBe None
+    "return None if no baCode is found related to the given code even if the user is logged in" in {
+      BillingAuthorities.find(nonExistingBaCode) shouldBe None
     }
 
     "have 350 entries" in {
-      BillingAuthorities.billingAuthorities.size mustBe BAMapSize
+      BillingAuthorities.billingAuthorities.size shouldBe BAMapSize
     }
 
-    "Return None if Forest Heath Code is found related to the given code even if the user is logged in" in {
-      BillingAuthorities.find(ForestHeath) mustBe None
+    "return None if Forest Heath Code is found related to the given code even if the user is logged in" in {
+      BillingAuthorities.find(ForestHeath) shouldBe None
     }
 
-    "Return None if St Edmundsbury Code is found related to the given code even if the user is logged in" in {
-      BillingAuthorities.find(StEdmundsbury) mustBe None
+    "return None if St Edmundsbury Code is found related to the given code even if the user is logged in" in {
+      BillingAuthorities.find(StEdmundsbury) shouldBe None
     }
 
-    "Return None if Suffolk Coastal Code is found related to the given code even if the user is logged in" in {
-      BillingAuthorities.find(SuffolkCoastal) mustBe None
+    "return None if Suffolk Coastal Code is found related to the given code even if the user is logged in" in {
+      BillingAuthorities.find(SuffolkCoastal) shouldBe None
     }
 
-    "Return None if Waveney Code is found related to the given code even if the user is logged in" in {
-      BillingAuthorities.find(Waveney) mustBe None
+    "return None if Waveney Code is found related to the given code even if the user is logged in" in {
+      BillingAuthorities.find(Waveney) shouldBe None
     }
   }

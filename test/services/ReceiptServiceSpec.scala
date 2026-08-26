@@ -16,18 +16,17 @@
 
 package services
 
-import base.SpecBase
 import models.*
 import org.apache.pdfbox.Loader
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts
 import org.apache.pdfbox.text.PDFTextStripper
-import org.scalatestplus.play.PlaySpec
+import uk.gov.hmrc.vo.unit.test.BaseAppSpec
 
 import java.time.Instant
 
-class ReceiptServiceSpec extends SpecBase:
+class ReceiptServiceSpec extends BaseAppSpec:
 
   private val service   = DefaultReceiptService(messagesApi)
   private val createdAt = Instant.ofEpochMilli(1773945357000L)
@@ -43,11 +42,11 @@ class ReceiptServiceSpec extends SpecBase:
 
       val pdf = Loader.loadPDF(data.get)
 
-      pdf.getDocumentInformation.getAuthor mustBe "HMRC - Valuation Office"
-      pdf.getDocumentInformation.getCreator mustBe "Billing Authority Reports"
-      pdf.getDocumentInformation.getCreationDate.toInstant mustBe createdAt
+      pdf.getDocumentInformation.getAuthor                 shouldBe "HMRC - Valuation Office"
+      pdf.getDocumentInformation.getCreator                shouldBe "Billing Authority Reports"
+      pdf.getDocumentInformation.getCreationDate.toInstant shouldBe createdAt
 
-      PDFTextStripper().getText(pdf) must include(s"Your file filename unavailable, was uploaded on ${reportStatus.formattedCreatedLong}.")
+      PDFTextStripper().getText(pdf) should include(s"Your file filename unavailable, was uploaded on ${reportStatus.formattedCreatedLong}.")
 
       pdf.close()
     }
@@ -62,10 +61,10 @@ class ReceiptServiceSpec extends SpecBase:
 
       val pdf = Loader.loadPDF(data.get)
 
-      pdf.getDocumentInformation.getAuthor mustBe "HMRC - Valuation Office"
-      pdf.getDocumentInformation.getCreationDate.toInstant mustBe createdAt
+      pdf.getDocumentInformation.getAuthor                 shouldBe "HMRC - Valuation Office"
+      pdf.getDocumentInformation.getCreationDate.toInstant shouldBe createdAt
 
-      PDFTextStripper().getText(pdf) must include(s"Your file filename unavailable, was uploaded on ${reportStatus.formattedCreatedLong}.")
+      PDFTextStripper().getText(pdf) should include(s"Your file filename unavailable, was uploaded on ${reportStatus.formattedCreatedLong}.")
 
       pdf.close()
     }
@@ -80,22 +79,22 @@ class ReceiptServiceSpec extends SpecBase:
 
       val pdf = Loader.loadPDF(data.get)
 
-      pdf.getDocumentInformation.getAuthor mustBe "HMRC - Valuation Office"
-      pdf.getDocumentInformation.getCreationDate.toInstant mustBe createdAt
+      pdf.getDocumentInformation.getAuthor                 shouldBe "HMRC - Valuation Office"
+      pdf.getDocumentInformation.getCreationDate.toInstant shouldBe createdAt
 
-      PDFTextStripper().getText(pdf) must include(s"Your file filename unavailable, was uploaded on ${reportStatus.formattedCreatedLong}.")
+      PDFTextStripper().getText(pdf) should include(s"Your file filename unavailable, was uploaded on ${reportStatus.formattedCreatedLong}.")
 
       pdf.close()
     }
 
     "have correct font" in {
-      service.font.getBaseFont must be(Standard14Fonts.FontName.HELVETICA_BOLD.getName)
+      service.font.getBaseFont should be(Standard14Fonts.FontName.HELVETICA_BOLD.getName)
     }
 
     "have correct margin, font size and leading" in {
-      service.fontSize must be(12f)
-      service.leading  must be(18f)
-      service.margin   must be(72)
+      service.fontSize should be(12f)
+      service.leading  should be(18f)
+      service.margin   should be(72)
     }
 
     "wrap text" in {
@@ -106,9 +105,9 @@ class ReceiptServiceSpec extends SpecBase:
 
       val lines = service.wrap(page, "My text" * 1000)
 
-      lines must have size 100
+      lines should have size 100
       lines foreach {
-        service.font.getStringWidth(_) must be <= (width * 1000)
+        service.font.getStringWidth(_) should be <= (width * 1000)
       }
     }
   }

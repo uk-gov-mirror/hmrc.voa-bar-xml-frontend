@@ -63,51 +63,51 @@ class CouncilTaxUploadViewSpec extends ViewBehaviours with ViewSpecBase:
 
   private val doc = asDocument(createView())
 
-  "CouncilTaxUpload view" must {
+  "CouncilTaxUpload view" should {
     behave like normalPage(() => createView(), messageKeyPrefix, "title", "submit.button")
 
-    "Include an username element displaying the BA name based on given BA Code" in {
+    "include an username element displaying the BA name based on given BA Code" in {
       val user = doc.select("#account-info-header > li:nth-child(2) > span:nth-child(2)").text
-      user mustBe "Reading"
+      user shouldBe "Reading"
     }
 
-    "Include a signout link which redirects the users to the login page" in {
+    "include a sign out link which redirects the users to the login page" in {
       val href = doc.getElementsByClass("hmrc-sign-out-nav__link").first.attr("href")
-      href mustBe controllers.routes.SignOutController.signOut.url
+      href shouldBe controllers.routes.SignOutController.signOut.url
     }
 
     "contain Submit button with the value Upload" in {
       val doc          = asDocument(createView())
       val submitButton = doc.getElementById("submit").text()
-      submitButton mustBe messages("councilTaxUpload.submit.button")
+      submitButton shouldBe messages("councilTaxUpload.submit.button")
     }
 
     "contain Upscan expected hidden inputs" in {
       val doc          = asDocument(createView())
       val upscanInputs = doc.getElementById("councilTaxUploadForm").getElementsByAttributeValue("type", "hidden")
-      Option(upscanInputs.select("[name='policy']")) mustBe defined
-      upscanInputs.select("[name='policy']").`val` mustBe initiateResponse.uploadRequest.fields("policy")
-      Option(upscanInputs.select("[name='x-amz-algorithm']")) mustBe defined
-      upscanInputs.select("[name='x-amz-algorithm']").`val` mustBe initiateResponse.uploadRequest.fields("x-amz-algorithm")
-      Option(upscanInputs.select("[name='x-amz-credential']")) mustBe defined
-      upscanInputs.select("[name='x-amz-credential']").`val` mustBe initiateResponse.uploadRequest.fields("x-amz-credential")
-      Option(upscanInputs.select("[name='x-amz-date']")) mustBe defined
-      upscanInputs.select("[name='x-amz-date']").`val` mustBe initiateResponse.uploadRequest.fields("x-amz-date")
-      Option(upscanInputs.select("[name='x-amz-meta-callback-url']")) mustBe defined
-      upscanInputs.select("[name='x-amz-meta-callback-url']").`val` mustBe initiateResponse.uploadRequest.fields("x-amz-meta-callback-url")
-      Option(upscanInputs.select("[name='x-amz-meta-consuming-service']")) mustBe defined
-      upscanInputs.select("[name='x-amz-meta-consuming-service']").`val` mustBe initiateResponse.uploadRequest.fields("x-amz-meta-consuming-service")
-      Option(upscanInputs.select("[name='x-amz-signature']")) mustBe defined
-      upscanInputs.select("[name='x-amz-signature']").`val` mustBe initiateResponse.uploadRequest.fields("x-amz-signature")
-      Option(upscanInputs.select("[name='acl']")) mustBe defined
-      upscanInputs.select("[name='acl']").`val` mustBe initiateResponse.uploadRequest.fields("acl")
-      Option(upscanInputs.select("[name='key']")) mustBe defined
-      upscanInputs.select("[name='key']").`val` mustBe initiateResponse.uploadRequest.fields("key")
+      Option(upscanInputs.select("[name='policy']"))                       shouldBe defined
+      upscanInputs.select("[name='policy']").`val`                         shouldBe initiateResponse.uploadRequest.fields("policy")
+      Option(upscanInputs.select("[name='x-amz-algorithm']"))              shouldBe defined
+      upscanInputs.select("[name='x-amz-algorithm']").`val`                shouldBe initiateResponse.uploadRequest.fields("x-amz-algorithm")
+      Option(upscanInputs.select("[name='x-amz-credential']"))             shouldBe defined
+      upscanInputs.select("[name='x-amz-credential']").`val`               shouldBe initiateResponse.uploadRequest.fields("x-amz-credential")
+      Option(upscanInputs.select("[name='x-amz-date']"))                   shouldBe defined
+      upscanInputs.select("[name='x-amz-date']").`val`                     shouldBe initiateResponse.uploadRequest.fields("x-amz-date")
+      Option(upscanInputs.select("[name='x-amz-meta-callback-url']"))      shouldBe defined
+      upscanInputs.select("[name='x-amz-meta-callback-url']").`val`        shouldBe initiateResponse.uploadRequest.fields("x-amz-meta-callback-url")
+      Option(upscanInputs.select("[name='x-amz-meta-consuming-service']")) shouldBe defined
+      upscanInputs.select("[name='x-amz-meta-consuming-service']").`val`   shouldBe initiateResponse.uploadRequest.fields("x-amz-meta-consuming-service")
+      Option(upscanInputs.select("[name='x-amz-signature']"))              shouldBe defined
+      upscanInputs.select("[name='x-amz-signature']").`val`                shouldBe initiateResponse.uploadRequest.fields("x-amz-signature")
+      Option(upscanInputs.select("[name='acl']"))                          shouldBe defined
+      upscanInputs.select("[name='acl']").`val`                            shouldBe initiateResponse.uploadRequest.fields("acl")
+      Option(upscanInputs.select("[name='key']"))                          shouldBe defined
+      upscanInputs.select("[name='key']").`val`                            shouldBe initiateResponse.uploadRequest.fields("key")
     }
 
     "do not contain Submit button when there is not initiate response" in {
       val doc          = asDocument(createView(false))
       val submitButton = Option(doc.getElementById("submit"))
-      submitButton mustBe None
+      submitButton shouldBe None
     }
   }

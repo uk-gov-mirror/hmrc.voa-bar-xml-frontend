@@ -16,11 +16,14 @@
 
 package controllers
 
-import base.SpecBase
+import config.AppConfig
 import controllers.actions.FakeDataRetrievalAction
 import models.CacheMap
+import uk.gov.hmrc.vo.unit.test.BaseAppSpec
 
-trait ControllerSpecBase extends SpecBase:
+trait ControllerSpecBase extends BaseAppSpec:
+
+  val frontendAppConfig: AppConfig = inject[AppConfig]
 
   val cacheMapId = "id"
 

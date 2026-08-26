@@ -16,11 +16,10 @@
 
 package utils
 
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.must
-import play.api.libs.json.{JsError, JsObject, JsString, JsSuccess, Json}
+import play.api.libs.json.*
+import uk.gov.hmrc.vo.unit.test.BaseSpec
 
-class FormatsSpec extends AnyFlatSpec with must.Matchers:
+class FormatsSpec extends BaseSpec:
 
   private val uniformData: Map[List[String], String] = Map(
     List("simple", "path") -> "value in simple path",
@@ -29,15 +28,17 @@ class FormatsSpec extends AnyFlatSpec with must.Matchers:
 
   private val jsonData: JsObject = Json.obj("simple.path" -> "value in simple path", "OneElementPath" -> "value in oneElementPath")
 
-  "uniformDBFormat" should "write uniform DB data to Json" in {
-    Formats.uniformDBFormat.writes(uniformData) mustBe jsonData
-  }
+  "uniformDBFormat" should {
+    "write uniform DB data to Json" in {
+      Formats.uniformDBFormat.writes(uniformData) shouldBe jsonData
+    }
 
-  it should "read data from json to UniformDB format" in {
-    Formats.uniformDBFormat.reads(jsonData) mustBe JsSuccess(uniformData)
-  }
+    "read data from json to UniformDB format" in {
+      Formats.uniformDBFormat.reads(jsonData) shouldBe JsSuccess(uniformData)
+    }
 
-  it should "not read data from json for unsuported format" in {
-    val data = JsString("value")
-    Formats.uniformDBFormat.reads(data) mustBe a[JsError]
+    "not read data from json for unsupported format" in {
+      val data = JsString("value")
+      Formats.uniformDBFormat.reads(data) shouldBe a[JsError]
+    }
   }

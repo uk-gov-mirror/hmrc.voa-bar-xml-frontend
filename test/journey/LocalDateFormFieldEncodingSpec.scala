@@ -16,15 +16,13 @@
 
 package journey
 
-import java.time.LocalDate
-import org.scalatest.EitherValues
 import journey.LocalDateFormFieldEncoding.{day, month, year}
 import ltbs.uniform.ErrorTree
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should
-import org.scalatest.prop.TableDrivenPropertyChecks
+import uk.gov.hmrc.vo.unit.test.BaseSpec
 
-class LocalDateFormFieldEncodingSpec extends AnyFlatSpec with should.Matchers with EitherValues with TableDrivenPropertyChecks:
+import java.time.LocalDate
+
+class LocalDateFormFieldEncodingSpec extends BaseSpec:
 
   private val encoding = LocalDateFormFieldEncoding()
   private val tomorrow = LocalDate.now().plusDays(1)
@@ -56,41 +54,42 @@ class LocalDateFormFieldEncodingSpec extends AnyFlatSpec with should.Matchers wi
     (today.getDayOfMonth.toString, today.getMonthValue.toString, today.getYear.toString)
   )
 
-  "LocalDateformFieldEncoding" should "decode and validate correct date" in {
-    val input = Map(
-      year  -> List("2020"),
-      month -> List("3"),
-      day   -> List("30")
-    )
-    encoding.decode(input).value shouldBe LocalDate.of(2020, 3, 30)
-  }
-
-  it should "Fail validation for all invalidInput" in
-    forAll(invalidInputDate) { (_day: String, _month: String, _year: String) =>
+  "LocalDateFormFieldEncoding" should {
+    "decode and validate correct date" in {
       val input = Map(
-        year  -> List(_year),
-        month -> List(_month),
-        day   -> List(_day)
+        year  -> List("2020"),
+        month -> List("3"),
+        day   -> List("30")
       )
-      encoding.decode(input).left.value shouldBe a[ErrorTree]
+      encoding.decode(input).value shouldBe LocalDate.of(2020, 3, 30)
     }
 
-  it should "Validate input for all valid input dates" in
-    forAll(validInputDate) { (_day: String, _month: String, _year: String) =>
-      val input = Map(
-        year  -> List(_year),
-        month -> List(_month),
-        day   -> List(_day)
-      )
-      encoding.decode(input).value shouldBe a[LocalDate]
+    "Fail validation for all invalidInput" in
+      forAll(invalidInputDate) { (_day: String, _month: String, _year: String) =>
+        val input = Map(
+          year  -> List(_year),
+          month -> List(_month),
+          day   -> List(_day)
+        )
+        encoding.decode(input).left.value shouldBe a[ErrorTree]
+      }
+
+    "Validate input for all valid input dates" in
+      forAll(validInputDate) { (_day: String, _month: String, _year: String) =>
+        val input = Map(
+          year  -> List(_year),
+          month -> List(_month),
+          day   -> List(_day)
+        )
+        encoding.decode(input).value shouldBe a[LocalDate]
+      }
+
+    "convert LocalDate to Input" in {
+      encoding.encode(LocalDate.of(1900, 1, 1)) shouldBe
+        Map(
+          year  -> List("1900"),
+          month -> List("1"),
+          day   -> List("1")
+        )
     }
-
-  it should "convert LocalDate to Input" in {
-    encoding.encode(LocalDate.of(1900, 1, 1)) shouldBe
-      Map(
-        year  -> List("1900"),
-        month -> List("1"),
-        day   -> List("1")
-      )
-
   }

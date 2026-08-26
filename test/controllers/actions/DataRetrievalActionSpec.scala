@@ -16,65 +16,59 @@
 
 package controllers.actions
 
-import base.SpecBase
 import connectors.DataCacheConnector
 import models.CacheMap
 import models.requests.OptionalDataRequest
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
 import org.scalatest.RecoverMethods
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatestplus.mockito.MockitoSugar
-import play.api.mvc.{BodyParsers, Request}
+import play.api.mvc.Request
+import play.api.test.Helpers.stubControllerComponents
 import uk.gov.hmrc.http.SessionKeys
+import uk.gov.hmrc.vo.unit.test.BaseAppSpec
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class DataRetrievalActionSpec extends SpecBase with MockitoSugar with ScalaFutures with RecoverMethods:
+class DataRetrievalActionSpec extends BaseAppSpec with RecoverMethods:
 
-  private val bodyParser = inject[BodyParsers.Default]
-
-  class Harness(dataCacheConnector: DataCacheConnector) extends DataRetrievalActionImpl(dataCacheConnector, bodyParser):
+  class Harness(dataCacheConnector: DataCacheConnector) extends DataRetrievalActionImpl(dataCacheConnector, stubControllerComponents()):
     def callTransform[A](request: Request[A]): Future[OptionalDataRequest[A]] = transform(request)
 
   "Data Retrieval Action" when {
 
-    "there is no data in the cache" must {
+    "there is no data in the cache" should {
       "set userAnswers to 'None' in the request" in {
         val dataCacheConnector = mock[DataCacheConnector]
         when(dataCacheConnector.fetch(any[String])).thenReturn(Future(None))
         val action             = Harness(dataCacheConnector)
 
-        val futureResult = action.callTransform(fakeRequest.withSession(SessionKeys.sessionId -> "id"))
+        val futureResult = action.callTransform(getRequest.withSession(SessionKeys.sessionId -> "id"))
 
         whenReady(futureResult) { result =>
-          result.userAnswers.isEmpty mustBe true
+          result.userAnswers.isEmpty shouldBe true
         }
       }
     }
 
-    "there is data in the cache" must {
+    "there is data in the cache" should {
       "build a userAnswers object and add it to the request" in {
         val dataCacheConnector = mock[DataCacheConnector]
         when(dataCacheConnector.fetch(any[String])).thenReturn(Future(Some(CacheMap("id", Map()))))
         val action             = Harness(dataCacheConnector)
 
-        val futureResult = action.callTransform(fakeRequest.withSession(SessionKeys.sessionId -> "id"))
+        val futureResult = action.callTransform(getRequest.withSession(SessionKeys.sessionId -> "id"))
 
         whenReady(futureResult) { result =>
-          result.userAnswers.isDefined mustBe true
+          result.userAnswers.isDefined shouldBe true
         }
       }
     }
 
-    "there is no session Id in the request" must {
+    "there is no session Id in the request" should {
       "throw an exception" in {
         val dataCacheConnector = mock[DataCacheConnector]
         val action             = Harness(dataCacheConnector)
 
         recoverToSucceededIf[IllegalStateException] {
-          action.callTransform(fakeRequest)
+          action.callTransform(getRequest)
         }
       }
     }

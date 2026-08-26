@@ -17,36 +17,34 @@
 package journey
 
 import journey.ReasonReportType.*
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should
-import org.scalatest.prop.TableDrivenPropertyChecks
 import play.api.libs.json.{JsString, Json}
+import uk.gov.hmrc.vo.unit.test.BaseSpec
 import utils.ReflectionUtil
 
-class ReasonReportTypeSpec extends AnyFlatSpec with should.Matchers with TableDrivenPropertyChecks:
+class ReasonReportTypeSpec extends BaseSpec:
 
-  "ReasonReportType" should "have all instance in Lister for to render radio buttons in order" in {
+  "ReasonReportType" should {
+    "have all instance in Lister for to render radio buttons in order" in {
+      ReflectionUtil.findAllSubTypeNames[ReasonReportType] should contain theSameElementsAs ReasonReportType.order
+    }
 
-    ReflectionUtil.findAllSubTypeNames[ReasonReportType] should contain theSameElementsAs ReasonReportType.order
+    "deserialize" in
+      List(
+        "AddProperty",
+        "RemoveProperty"
+      ).foreach { reasonTypeString =>
+        val json     = JsString(reasonTypeString)
+        val jsResult = Json.fromJson(json)
+        jsResult.isSuccess shouldBe true
+        val noPlanningReferenceType = jsResult.get
+        noPlanningReferenceType.toString shouldBe reasonTypeString
+      }
+
+    "serialize" in
+      List(
+        AddProperty,
+        RemoveProperty
+      ).foreach { reasonReportType =>
+        Json.toJson(reasonReportType)(using ReasonReportType.format) shouldBe JsString(reasonReportType.toString)
+      }
   }
-
-  it should "deserialize" in
-    List(
-      "AddProperty",
-      "RemoveProperty"
-    ).foreach { reasonTypeString =>
-      val json     = JsString(reasonTypeString)
-      val jsResult = Json.fromJson(json)
-      jsResult.isSuccess shouldBe true
-      val noPlanningReferenceType = jsResult.get
-      noPlanningReferenceType.toString shouldBe reasonTypeString
-
-    }
-
-  it should "serialize" in
-    List(
-      AddProperty,
-      RemoveProperty
-    ).foreach { reasonReportType =>
-      Json.toJson(reasonReportType)(using ReasonReportType.format) shouldBe JsString(reasonReportType.toString)
-    }

@@ -24,7 +24,7 @@ class OptionFieldBehaviours extends FieldBehaviours:
     "bind all valid values" in {
       for (value <- validValues)
         val result = form.bind(Map(fieldName -> value.toString)).apply(fieldName)
-        result.value.value shouldEqual value.toString
+        result.value.get shouldEqual value.toString
     }
 
     "not bind invalid values" in {

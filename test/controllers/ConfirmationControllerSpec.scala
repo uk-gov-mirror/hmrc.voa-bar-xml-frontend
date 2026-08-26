@@ -22,23 +22,18 @@ import identifiers.LoginId
 import journey.UniformJourney.{Address, ContactDetails, Cr01Cr03Submission}
 import journey.{AddProperty, Demolition, RemoveProperty}
 import models.*
-import org.mockito.ArgumentMatchers.{any, eq as eqTo}
-import org.mockito.Mockito.when
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.MessagesControllerComponents
 import play.api.test.Helpers.*
-import play.api.test.Injecting
 import uk.gov.hmrc.http.HeaderCarrier
 import views.ViewSpecBase
 import views.html.components.{confirmation_detail_panel, confirmation_status_panel}
 
 import java.time.LocalDate
 import java.util.UUID
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
-class ConfirmationControllerSpec extends ControllerSpecBase with ViewSpecBase with MockitoSugar with Injecting:
+class ConfirmationControllerSpec extends ControllerSpecBase with ViewSpecBase:
 
   private def controllerComponents   = inject[MessagesControllerComponents]
   private def reportConfirmationView = inject[views.html.govuk.confirmation]
@@ -48,16 +43,14 @@ class ConfirmationControllerSpec extends ControllerSpecBase with ViewSpecBase wi
   private def confirmationStatusPanel = inject[confirmation_status_panel]
   private def confirmationDetailPanel = inject[confirmation_detail_panel]
 
-  implicit def hc: HeaderCarrier = any[HeaderCarrier]
-
   private val username                  = "AUser"
   private val submissionId              = "SID372463"
   private val login2                    = Login(username, "bar")
   private val reportStatus              = ReportStatus(submissionId, status = Some(Submitted.value))
   private val reportStatusConnectorMock = mock[ReportStatusConnector]
-  when(reportStatusConnectorMock.saveUserInfo(any[String], any[Login])).thenReturn(Future(Right(())))
-  when(reportStatusConnectorMock.save(any[ReportStatus], any[Login])).thenReturn(Future(Right(())))
-  when(reportStatusConnectorMock.getByReference(any[String], any[Login])).thenReturn(Future(Right(reportStatus)))
+  when(reportStatusConnectorMock.saveUserInfo(any[String], any[Login])(using any[HeaderCarrier])).thenReturn(Future(Right(())))
+  when(reportStatusConnectorMock.save(any[ReportStatus], any[Login])(using any[HeaderCarrier])).thenReturn(Future(Right(())))
+  when(reportStatusConnectorMock.getByReference(any[String], any[Login])(using any[HeaderCarrier])).thenReturn(Future(Right(reportStatus)))
 
   private def onwardRoute = routes.LoginController.onPageLoad(NormalMode)
 
@@ -93,69 +86,68 @@ class ConfirmationControllerSpec extends ControllerSpecBase with ViewSpecBase wi
     )
 
   private def cr01cr03ViewAsString(report: ReportStatus, cr01cr03Report: Option[Cr01Cr03Submission]) =
-    reportConfirmationView(username, report, cr01cr03Report)(using fakeRequest, messages).toString
+    reportConfirmationView(username, report, cr01cr03Report)(using getRequest, messages).toString
 
   private def viewAsString(submissionId: String = submissionId) =
-    confirmationView(username, submissionId)(using fakeRequest, messages).toString
+    confirmationView(username, submissionId)(using getRequest, messages).toString
 
   private def refreshViewAsString() =
-    confirmationView(username, submissionId, Some(reportStatus))(using fakeRequest, messages).toString
+    confirmationView(username, submissionId, Some(reportStatus))(using getRequest, messages).toString
 
-  "Confirmation Controller" must {
-
+  "Confirmation Controller" should {
     "return OK and the correct view for a GET" in {
-      val result = loggedInController().onPageLoad(submissionId)(fakeRequest)
+      val result = loggedInController().onPageLoad(submissionId)(getRequest)
 
-      status(result) mustBe OK
-      contentAsString(result) mustBe viewAsString()
+      status(result)          shouldBe OK
+      contentAsString(result) shouldBe viewAsString()
     }
 
     "return OK and the correct view for a GET - when status is verified" in {
       val verifiedSubmissionId = "VID372463"
       val verifiedReportStatus = ReportStatus(verifiedSubmissionId, status = Some(Verified.value))
-      when(reportStatusConnectorMock.getByReference(eqTo(verifiedSubmissionId), any[Login]))
+      when(reportStatusConnectorMock.getByReference(eqTo(verifiedSubmissionId), any[Login])(using any[HeaderCarrier]))
         .thenReturn(Future(Right(verifiedReportStatus)))
 
-      val result = loggedInController().onPageLoad(verifiedSubmissionId)(fakeRequest)
+      val result = loggedInController().onPageLoad(verifiedSubmissionId)(getRequest)
 
-      status(result) mustBe OK
-      contentAsString(result) mustBe viewAsString(submissionId = verifiedSubmissionId)
+      status(result)          shouldBe OK
+      contentAsString(result) shouldBe viewAsString(submissionId = verifiedSubmissionId)
     }
 
-    "if not authorized by VO must go to the login page" in {
-      val result = notLoggedInController().onPageLoad(submissionId)(fakeRequest)
+    "if not authorized by VO should go to the login page" in {
+      val result = notLoggedInController().onPageLoad(submissionId)(getRequest)
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(onwardRoute.url)
+      status(result)           shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(onwardRoute.url)
     }
 
     "return OK and the correct view for the refresh page" in {
-      val result = loggedInController().onPageRefresh(submissionId)(fakeRequest)
+      val result = loggedInController().onPageRefresh(submissionId)(getRequest)
 
-      status(result) mustBe OK
-      contentAsString(result) mustBe refreshViewAsString()
+      status(result)          shouldBe OK
+      contentAsString(result) shouldBe refreshViewAsString()
     }
 
     "return OK and the correct view for the status check" in {
-      val result = loggedInController().onStatusCheck(submissionId)(fakeRequest)
+      val result = loggedInController().onStatusCheck(submissionId)(getRequest)
 
-      status(result) mustBe OK
-      contentAsJson(result).as[JsObject].keys.contains("status") mustBe true
-      contentAsJson(result).as[JsObject].keys.contains("statusPanel") mustBe true
+      status(result)                                                  shouldBe OK
+      contentAsJson(result).as[JsObject].keys.contains("status")      shouldBe true
+      contentAsJson(result).as[JsObject].keys.contains("statusPanel") shouldBe true
     }
 
-    "if while refreshing not authorized by VO must go to the login page" in {
-      val result = notLoggedInController().onPageRefresh(submissionId)(fakeRequest)
+    "if while refreshing not authorized by VO should go to the login page" in {
+      val result = notLoggedInController().onPageRefresh(submissionId)(getRequest)
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(onwardRoute.url)
+      status(result)           shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(onwardRoute.url)
     }
 
-    "if while checking the status not authorized by VO must go to the login page" in {
-      val result = notLoggedInController().onStatusCheck(submissionId)(fakeRequest)
+    "if while checking the status not authorized by VO should go to the login page" in {
+      val result = notLoggedInController().onStatusCheck(submissionId)(getRequest)
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(onwardRoute.url)
+      status(result)           shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(onwardRoute.url)
     }
 
     "if CR03 report is present, it should render confirmation page with all details" in {
@@ -167,12 +159,12 @@ class ConfirmationControllerSpec extends ControllerSpecBase with ViewSpecBase wi
       )
       val cr03ReportStatus = reportStatus.copy(report = Option(cr03Json), id = submissionId)
 
-      when(reportStatusConnectorMock.getByReference(eqTo(submissionId), any[Login]))
+      when(reportStatusConnectorMock.getByReference(eqTo(submissionId), any[Login])(using any[HeaderCarrier]))
         .thenReturn(Future(Right(cr03ReportStatus)))
-      val result = loggedInController().onPageRefresh(submissionId)(fakeRequest)
+      val result = loggedInController().onPageRefresh(submissionId)(getRequest)
 
-      status(result) mustBe OK
-      contentAsString(result) mustBe cr01cr03ViewAsString(cr03ReportStatus, Some(cr03Report))
+      status(result)          shouldBe OK
+      contentAsString(result) shouldBe cr01cr03ViewAsString(cr03ReportStatus, Some(cr03Report))
     }
   }
 
@@ -204,12 +196,12 @@ class ConfirmationControllerSpec extends ControllerSpecBase with ViewSpecBase wi
     )
     val cr01ReportStatus = reportStatus.copy(report = Option(cr01Json), id = submissionId)
 
-    when(reportStatusConnectorMock.getByReference(eqTo(submissionId), any[Login]))
+    when(reportStatusConnectorMock.getByReference(eqTo(submissionId), any[Login])(using any[HeaderCarrier]))
       .thenReturn(Future(Right(cr01ReportStatus)))
-    val result = loggedInController().onPageRefresh(submissionId)(fakeRequest)
+    val result = loggedInController().onPageRefresh(submissionId)(getRequest)
 
-    status(result) mustBe OK
-    contentAsString(result) mustBe cr01cr03ViewAsString(cr01ReportStatus, Some(cr01Report))
+    status(result)          shouldBe OK
+    contentAsString(result) shouldBe cr01cr03ViewAsString(cr01ReportStatus, Some(cr01Report))
   }
 
   def aCr01Report: Cr01Cr03Submission =

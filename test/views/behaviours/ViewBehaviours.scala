@@ -24,7 +24,7 @@ trait ViewBehaviours extends ViewSpecBase:
 
   def normalPage(view: () => HtmlFormat.Appendable, messageKeyPrefix: String, expectedGuidanceKeys: String*): Unit =
     "behave like a normal page" when {
-      "rendered" must {
+      "rendered" should {
         "display the correct browser title" in {
           val doc = asDocument(view())
           assertEqualsValue(doc, "title", messages("service.title", messages(s"$messageKeyPrefix.title")))
@@ -48,7 +48,7 @@ trait ViewBehaviours extends ViewSpecBase:
     }
 
   def pageWithBackLink(view: () => HtmlFormat.Appendable): Unit =
-    "behave like a page with a back link" must {
+    "behave like a page with a back link" should {
       "have a back link" in {
         val doc = asDocument(view())
         assertRenderedById(doc, "back-link")
@@ -60,4 +60,4 @@ trait ViewBehaviours extends ViewSpecBase:
     assert(messages.isDefinedAt(s"$prefix.$option"))
 
     val label = doc.select(s"label[for=$prefix.$option]")
-    label.size mustBe 1
+    label.size shouldBe 1

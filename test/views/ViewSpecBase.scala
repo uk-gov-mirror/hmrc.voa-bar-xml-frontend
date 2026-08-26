@@ -16,16 +16,16 @@
 
 package views
 
-import java.util.Locale
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import play.twirl.api.Html
-import base.SpecBase
 import org.scalatest.compatible.Assertion
 import play.api.i18n.Lang
-import play.api.test.Injecting
+import play.twirl.api.Html
+import uk.gov.hmrc.vo.unit.test.BaseAppSpec
 
-trait ViewSpecBase extends SpecBase with Injecting:
+import java.util.Locale
+
+trait ViewSpecBase extends BaseAppSpec:
 
   implicit def lang: Lang = Lang(Locale.UK)
 
@@ -44,7 +44,7 @@ trait ViewSpecBase extends SpecBase with Injecting:
 
   def assertPageTitleEqualsMessage(doc: Document, expectedMessageKey: String, args: Any*): Boolean =
     val headers = doc.getElementsByTag("h1")
-    headers.size mustBe 1
+    headers.size shouldBe 1
     headers.first.text.replaceAll("\u00a0", " ").contains(messages(expectedMessageKey, args*).replaceAll("&nbsp;", " "))
 
   def assertContainsText(doc: Document, text: String): Assertion =

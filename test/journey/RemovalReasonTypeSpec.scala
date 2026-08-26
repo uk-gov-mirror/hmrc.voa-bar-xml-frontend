@@ -17,47 +17,46 @@
 package journey
 
 import journey.RemovalReasonType.*
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should
-import org.scalatest.prop.TableDrivenPropertyChecks
 import play.api.libs.json.{JsString, Json}
+import uk.gov.hmrc.vo.unit.test.BaseSpec
 import utils.ReflectionUtil
 
-class RemovalReasonTypeSpec extends AnyFlatSpec with should.Matchers with TableDrivenPropertyChecks:
+class RemovalReasonTypeSpec extends BaseSpec:
 
-  "RemovalReasonType" should "have all instance in Lister for to render radio buttons in order" in {
+  "RemovalReasonType" should {
+    "have all instance in Lister for to render radio buttons in order" in {
+      ReflectionUtil.findAllSubTypeNames[RemovalReasonType] should contain theSameElementsAs RemovalReasonType.order
+    }
 
-    ReflectionUtil.findAllSubTypeNames[RemovalReasonType] should contain theSameElementsAs RemovalReasonType.order
+    "deserialize" in
+      List(
+        "Demolition",
+        "Disrepair",
+        "Derelict",
+        "Renovating",
+        "BandedTooSoonOrNotComplete",
+        "CaravanRemoved",
+        "Duplicate",
+        "OtherReason"
+      ).foreach { removalReasonTypeString =>
+        val json     = JsString(removalReasonTypeString)
+        val jsResult = Json.fromJson(json)
+        jsResult.isSuccess shouldBe true
+        val noPlanningReferenceType = jsResult.get
+        noPlanningReferenceType.toString shouldBe removalReasonTypeString
+      }
+
+    "serialize" in
+      List(
+        Demolition,
+        Disrepair,
+        Derelict,
+        Renovating,
+        BandedTooSoonOrNotComplete,
+        CaravanRemoved,
+        Duplicate,
+        OtherReason
+      ).foreach { removalReasonType =>
+        Json.toJson(removalReasonType)(using RemovalReasonType.format) shouldBe JsString(removalReasonType.toString)
+      }
   }
-
-  it should "deserialize" in
-    List(
-      "Demolition",
-      "Disrepair",
-      "Derelict",
-      "Renovating",
-      "BandedTooSoonOrNotComplete",
-      "CaravanRemoved",
-      "Duplicate",
-      "OtherReason"
-    ).foreach { removalReasonTypeString =>
-      val json     = JsString(removalReasonTypeString)
-      val jsResult = Json.fromJson(json)
-      jsResult.isSuccess shouldBe true
-      val noPlanningReferenceType = jsResult.get
-      noPlanningReferenceType.toString shouldBe removalReasonTypeString
-    }
-
-  it should "serialize" in
-    List(
-      Demolition,
-      Disrepair,
-      Derelict,
-      Renovating,
-      BandedTooSoonOrNotComplete,
-      CaravanRemoved,
-      Duplicate,
-      OtherReason
-    ).foreach { removalReasonType =>
-      Json.toJson(removalReasonType)(using RemovalReasonType.format) shouldBe JsString(removalReasonType.toString)
-    }

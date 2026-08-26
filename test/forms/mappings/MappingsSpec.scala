@@ -16,15 +16,12 @@
 
 package forms.mappings
 
-import org.scalatest.matchers.must
-import org.scalatest.wordspec.AnyWordSpec
-import org.scalatest.OptionValues
 import play.api.data.{Form, FormError}
+import uk.gov.hmrc.vo.unit.test.BaseSpec
 
-class MappingsSpec extends AnyWordSpec with must.Matchers with OptionValues with Mappings:
+class MappingsSpec extends BaseSpec with Mappings:
 
-  "text" must {
-
+  "text" should {
     val testForm: Form[String] =
       Form(
         "value" -> text()
@@ -32,33 +29,32 @@ class MappingsSpec extends AnyWordSpec with must.Matchers with OptionValues with
 
     "bind a valid string" in {
       val result = testForm.bind(Map("value" -> "foobar"))
-      result.get mustEqual "foobar"
+      result.get shouldEqual "foobar"
     }
 
     "not bind an empty string" in {
       val result = testForm.bind(Map("value" -> ""))
-      result.errors must contain(FormError("value", "error.required"))
+      result.errors should contain(FormError("value", "error.required"))
     }
 
     "not bind an empty map" in {
       val result = testForm.bind(Map.empty[String, String])
-      result.errors must contain(FormError("value", "error.required"))
+      result.errors should contain(FormError("value", "error.required"))
     }
 
     "return a custom error message" in {
       val form   = Form("value" -> text("custom.error"))
       val result = form.bind(Map("value" -> ""))
-      result.errors must contain(FormError("value", "custom.error"))
+      result.errors should contain(FormError("value", "custom.error"))
     }
 
     "unbind a valid value" in {
       val result = testForm.fill("foobar")
-      result.apply("value").value.value mustEqual "foobar"
+      result.apply("value").value.get shouldEqual "foobar"
     }
   }
 
-  "boolean" must {
-
+  "boolean" should {
     val testForm: Form[Boolean] =
       Form(
         "value" -> boolean()
@@ -66,37 +62,36 @@ class MappingsSpec extends AnyWordSpec with must.Matchers with OptionValues with
 
     "bind true" in {
       val result = testForm.bind(Map("value" -> "true"))
-      result.get mustEqual true
+      result.get shouldEqual true
     }
 
     "bind false" in {
       val result = testForm.bind(Map("value" -> "false"))
-      result.get mustEqual false
+      result.get shouldEqual false
     }
 
     "not bind a non-boolean" in {
       val result = testForm.bind(Map("value" -> "not a boolean"))
-      result.errors must contain(FormError("value", "error.boolean"))
+      result.errors should contain(FormError("value", "error.boolean"))
     }
 
     "not bind an empty value" in {
       val result = testForm.bind(Map("value" -> ""))
-      result.errors must contain(FormError("value", "error.required"))
+      result.errors should contain(FormError("value", "error.required"))
     }
 
     "not bind an empty map" in {
       val result = testForm.bind(Map.empty[String, String])
-      result.errors must contain(FormError("value", "error.required"))
+      result.errors should contain(FormError("value", "error.required"))
     }
 
     "unbind" in {
       val result = testForm.fill(true)
-      result.apply("value").value.value mustEqual "true"
+      result.apply("value").value.get shouldEqual "true"
     }
   }
 
-  "int" must {
-
+  "int" should {
     val testForm: Form[Int] =
       Form(
         "value" -> int()
@@ -104,21 +99,21 @@ class MappingsSpec extends AnyWordSpec with must.Matchers with OptionValues with
 
     "bind a valid integer" in {
       val result = testForm.bind(Map("value" -> "1"))
-      result.get mustEqual 1
+      result.get shouldEqual 1
     }
 
     "not bind an empty value" in {
       val result = testForm.bind(Map("value" -> ""))
-      result.errors must contain(FormError("value", "error.required"))
+      result.errors should contain(FormError("value", "error.required"))
     }
 
     "not bind an empty map" in {
       val result = testForm.bind(Map.empty[String, String])
-      result.errors must contain(FormError("value", "error.required"))
+      result.errors should contain(FormError("value", "error.required"))
     }
 
     "unbind a valid value" in {
       val result = testForm.fill(123)
-      result.apply("value").value.value mustEqual "123"
+      result.apply("value").value.get shouldEqual "123"
     }
   }

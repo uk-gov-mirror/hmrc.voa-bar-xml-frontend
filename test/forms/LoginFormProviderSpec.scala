@@ -24,7 +24,7 @@ class LoginFormProviderSpec extends StringFieldBehaviours:
 
   private val form: Form[Login] = LoginFormProvider()()
 
-  ".username" must {
+  ".username" should {
 
     val fieldName   = "username"
     val requiredKey = "login.error.username.required"
@@ -51,7 +51,7 @@ class LoginFormProviderSpec extends StringFieldBehaviours:
     )
   }
 
-  ".password" must {
+  ".password" should {
 
     val fieldName   = "password"
     val requiredKey = "login.error.password.required"

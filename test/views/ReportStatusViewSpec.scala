@@ -36,17 +36,16 @@ class ReportStatusViewSpec extends ViewBehaviours with ViewSpecBase:
 
   private def doc(reportStatuses: Seq[ReportStatus] = Seq()) = asDocument(createView(reportStatuses)())
 
-  "ReportStatus view" must {
+  "ReportStatus view" should {
     behave like normalPage(createView(), messageKeyPrefix)
 
     "Include an username element displaying the BA name based on given BA Code" in {
       val user = doc().select("#account-info-header > li:nth-child(2) > span:nth-child(2)").text
-      user mustBe "Slough"
+      user shouldBe "Slough"
     }
 
-    "Include a signout link which redirects the users to the login page" in {
+    "Include a sign out link which redirects the users to the login page" in {
       val href = doc().getElementsByClass("hmrc-sign-out-nav__link").first.attr("href")
-      href mustBe controllers.routes.SignOutController.signOut.url
+      href shouldBe controllers.routes.SignOutController.signOut.url
     }
-
   }

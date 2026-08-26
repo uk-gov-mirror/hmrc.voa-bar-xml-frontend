@@ -23,8 +23,8 @@ class SessionExpiredViewSpec extends ViewBehaviours:
 
   private val session_expired = inject[session_expired]
 
-  private def view = () => session_expired()(using fakeRequest, messages)
+  private def view = () => session_expired()(using getRequest, messages)
 
-  "Session Expired view" must {
+  "Session Expired view" should {
     behave like normalPage(view, "session_expired", "guidance")
   }

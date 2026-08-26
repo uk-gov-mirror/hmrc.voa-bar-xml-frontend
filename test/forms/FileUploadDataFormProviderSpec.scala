@@ -24,7 +24,7 @@ class FileUploadDataFormProviderSpec extends StringFieldBehaviours:
 
   private val form: Form[FileUploadData] = FileUploadDataFormProvider()()
 
-  ".xml" must {
+  ".xml" should {
 
     val fieldName   = "xml"
     val requiredKey = "councilTaxUpload.error.xml.required"

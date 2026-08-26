@@ -29,7 +29,7 @@ trait StringViewBehaviours extends QuestionViewBehaviours[String]:
     expectedHintKey: Option[String] = None
   ): Unit =
     "behave like a page with a string value field" when {
-      "rendered" must {
+      "rendered" should {
 
         "contain a label for the value" in {
           val doc              = asDocument(createView(form))
@@ -43,14 +43,14 @@ trait StringViewBehaviours extends QuestionViewBehaviours[String]:
         }
       }
 
-      "rendered with a valid form" must {
+      "rendered with a valid form" should {
         "include the form's value in the value input" in {
           val doc = asDocument(createView(form.fill(answer)))
-          doc.getElementById("value").attr("value") mustBe answer
+          doc.getElementById("value").attr("value") shouldBe answer
         }
       }
 
-      "rendered with an error" must {
+      "rendered with an error" should {
 
         "show an error summary" in {
           val doc = asDocument(createView(form.withError(error)))
@@ -60,7 +60,7 @@ trait StringViewBehaviours extends QuestionViewBehaviours[String]:
         "show an error in the value field's label" in {
           val doc       = asDocument(createView(form.withError(error)))
           val errorSpan = doc.getElementsByClass("error-notification").first
-          errorSpan.text mustBe messages(errorMessage)
+          errorSpan.text shouldBe messages(errorMessage)
         }
       }
     }

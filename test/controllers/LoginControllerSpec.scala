@@ -21,10 +21,6 @@ import controllers.actions.*
 import forms.LoginFormProvider
 import identifiers.{LoginId, VOAuthorisedId}
 import models.{CacheMap, Login, NormalMode}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
-import org.scalatestplus.mockito.MockitoSugar
-import play.api.Configuration
 import play.api.data.Form
 import play.api.libs.json.Json
 import play.api.mvc.MessagesControllerComponents
@@ -33,11 +29,10 @@ import uk.gov.hmrc.http.HeaderCarrier
 import utils.FakeNavigator
 import views.ViewSpecBase
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-class LoginControllerSpec extends ControllerSpecBase with ViewSpecBase with MockitoSugar:
+class LoginControllerSpec extends ControllerSpecBase with ViewSpecBase:
 
   private def onwardRoute = routes.LoginController.onPageLoad(NormalMode)
 
@@ -47,15 +42,14 @@ class LoginControllerSpec extends ControllerSpecBase with ViewSpecBase with Mock
 
   private def controllerComponents = inject[MessagesControllerComponents]
   private def login                = inject[views.html.login]
-  private val configuration        = inject[Configuration]
-
-  implicit def hc: HeaderCarrier = any[HeaderCarrier]
 
   private val loginConnector = mock[LoginConnector]
-  when(loginConnector.doLogin(any[Login])).thenReturn(Future.successful(Success(OK)))
+  when(loginConnector.doLogin(any[Login])(using any[HeaderCarrier]))
+    .thenReturn(Future.successful(Success(OK)))
 
-  private val loginConnectorF = mock[LoginConnector]
-  when(loginConnectorF.doLogin(any[Login])).thenReturn(Future.successful(Failure(RuntimeException("Received exception from upstream service"))))
+  private val loginConnectorFailed = mock[LoginConnector]
+  when(loginConnectorFailed.doLogin(any[Login])(using any[HeaderCarrier]))
+    .thenReturn(Future.successful(Failure(RuntimeException("Received exception from upstream service"))))
 
   private def controller(connector: LoginConnector, dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
     FakeDataCacheConnector.resetCaptures()
@@ -71,76 +65,78 @@ class LoginControllerSpec extends ControllerSpecBase with ViewSpecBase with Mock
       configuration
     )
 
-  private def viewAsString(form: Form[Login] = form) = login(form, NormalMode)(using fakeRequest, messages).toString
+  private def viewAsString(form: Form[Login] = form) = login(form, NormalMode)(using getRequest, messages).toString
 
-  "Login Controller" must {
-
+  "Login Controller" should {
     "return OK and the correct view for a GET" in {
-      val result = controller(loginConnector).onPageLoad(NormalMode)(fakeRequest)
+      val result = controller(loginConnector).onPageLoad(NormalMode)(getRequest)
 
-      status(result) mustBe OK
-      contentAsString(result) mustBe viewAsString()
+      status(result)          shouldBe OK
+      contentAsString(result) shouldBe viewAsString()
     }
 
     "populate the view correctly on a GET when the question has previously been answered" in {
       val validData       = Map(LoginId.toString -> Json.toJson(Login("username", "password")))
       val getRelevantData = FakeDataRetrievalAction(Some(CacheMap(cacheMapId, validData)))
 
-      val result = controller(loginConnector, getRelevantData).onPageLoad(NormalMode)(fakeRequest)
+      val result = controller(loginConnector, getRelevantData).onPageLoad(NormalMode)(getRequest)
 
-      contentAsString(result) mustBe viewAsString(form.fill(Login("username", "")))
+      contentAsString(result) shouldBe viewAsString(form.fill(Login("username", "")))
     }
 
     "redirect to the next page when valid data is submitted" in {
-      val postRequest = fakeRequest.withMethod("POST").withFormUrlEncodedBody(("username", validBACode), ("password", "value 2"))
+      val result = controller(loginConnector).onSubmit(NormalMode)(
+        postRequest.withFormUrlEncodedBody(("username", validBACode), ("password", "value 2"))
+      )
 
-      val result = controller(loginConnector).onSubmit(NormalMode)(postRequest)
-
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(onwardRoute.url)
+      status(result)           shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(onwardRoute.url)
     }
 
-    "logging in must cache an authorization token" in {
-      val postRequest = fakeRequest.withMethod("POST").withFormUrlEncodedBody(("username", validBACode), ("password", "value 2"))
-
-      val result = controller(loginConnector).onSubmit(NormalMode)(postRequest)
-      status(result) mustBe SEE_OTHER
-      FakeDataCacheConnector.getCapture(VOAuthorisedId.toString) mustBe Some(validBACode)
+    "logging in should cache an authorization token" in {
+      val result = controller(loginConnector).onSubmit(NormalMode)(
+        postRequest.withMethod("POST").withFormUrlEncodedBody(("username", validBACode), ("password", "value 2"))
+      )
+      status(result)                                             shouldBe SEE_OTHER
+      FakeDataCacheConnector.getCapture(VOAuthorisedId.toString) shouldBe Some(validBACode)
     }
 
     "return a Bad Request and errors when invalid data is submitted" in {
-      val postRequest = fakeRequest.withMethod("POST").withFormUrlEncodedBody(("value", "invalid value"))
-      val boundForm   = form.bind(Map("value" -> "invalid value"))
+      val boundForm = form.bind(Map("value" -> "invalid value"))
 
-      val result = controller(loginConnector).onSubmit(NormalMode)(postRequest)
+      val result = controller(loginConnector).onSubmit(NormalMode)(
+        postRequest.withMethod("POST").withFormUrlEncodedBody(("value", "invalid value"))
+      )
 
-      status(result) mustBe BAD_REQUEST
-      contentAsString(result) mustBe viewAsString(boundForm)
+      status(result)          shouldBe BAD_REQUEST
+      contentAsString(result) shouldBe viewAsString(boundForm)
     }
 
     "return a Bad Request and errors when valid bacode is submitted but no Council Name can be found related to the bacode" in {
-      val postRequest = fakeRequest.withMethod("POST").withFormUrlEncodedBody(("username", "ba0000"), ("password", "value"))
-      val boundForm   =
+      val boundForm =
         form
           .withError("username", messages("error.invalid_username"))
           .withError("password", messages("error.invalid_password"))
 
-      val result = controller(loginConnector).onSubmit(NormalMode)(postRequest)
+      val result = controller(loginConnector).onSubmit(NormalMode)(
+        postRequest.withMethod("POST").withFormUrlEncodedBody(("username", "ba0000"), ("password", "value"))
+      )
 
-      status(result) mustBe BAD_REQUEST
-      contentAsString(result) mustBe viewAsString(boundForm)
+      status(result)          shouldBe BAD_REQUEST
+      contentAsString(result) shouldBe viewAsString(boundForm)
     }
 
     "return a Bad Request and errors when the backend service call fails" in {
-      val postRequest = fakeRequest.withMethod("POST").withFormUrlEncodedBody(("username", "value 1"), ("password", "value 2"))
-      val boundForm   = form.bind(Map("username" -> "value 1", "password" -> "value2"))
+      val boundForm = form.bind(Map("username" -> "value 1", "password" -> "value2"))
 
       intercept[Exception] {
-        val result = controller(loginConnectorF).onSubmit(NormalMode)(postRequest)
-        status(result) mustBe BAD_REQUEST
-        contentAsString(result) mustBe viewAsString(boundForm)
-        redirectLocation(result) mustBe Some(onwardRoute.url)
-        FakeDataCacheConnector.getCapture(VOAuthorisedId.toString) mustBe None
+        val result = controller(loginConnectorFailed).onSubmit(NormalMode)(
+          postRequest.withMethod("POST").withFormUrlEncodedBody(("username", "value 1"), ("password", "value 2"))
+        )
+        status(result)                                             shouldBe BAD_REQUEST
+        contentAsString(result)                                    shouldBe viewAsString(boundForm)
+        redirectLocation(result)                                   shouldBe Some(onwardRoute.url)
+        FakeDataCacheConnector.getCapture(VOAuthorisedId.toString) shouldBe None
       }
     }
   }
