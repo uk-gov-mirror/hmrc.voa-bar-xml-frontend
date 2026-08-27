@@ -23,7 +23,7 @@ import uk.gov.hmrc.vo.unit.test.BaseAppSpec
 
 trait ControllerSpecBase extends BaseAppSpec:
 
-  val frontendAppConfig: AppConfig = inject[AppConfig]
+  val appConfig: AppConfig = inject[AppConfig]
 
   val cacheMapId = "id"
 

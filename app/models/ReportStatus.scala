@@ -64,8 +64,6 @@ object ReportStatus:
 
 final case class ReportStatus(
   id: String,
-  // TODO: After 1 April 2023 remove property 'created' as only 'createdAt' is used
-  created: Option[ZonedDateTime] = None,
   url: Option[String] = None,
   checksum: Option[String] = None,
   errors: Seq[Error] = Seq(),

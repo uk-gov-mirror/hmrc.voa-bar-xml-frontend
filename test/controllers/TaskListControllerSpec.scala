@@ -51,7 +51,7 @@ class TaskListControllerSpec extends ControllerSpecBase with ViewSpecBase:
   private def notLoggedInController(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
     FakeDataCacheConnector.resetCaptures()
     WelcomeController(
-      frontendAppConfig,
+      appConfig,
       dataRetrievalAction,
       DataRequiredActionImpl(ec),
       FakeNavigator(desiredRoute = onwardRoute),

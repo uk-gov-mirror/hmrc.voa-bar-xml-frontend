@@ -24,6 +24,7 @@ import play.api.mvc.MessagesControllerComponents
 import play.api.test.Helpers.*
 import utils.FakeNavigator
 import views.ViewSpecBase
+
 import scala.concurrent.ExecutionContext
 
 class WelcomeControllerSpec extends ControllerSpecBase with ViewSpecBase:
@@ -39,7 +40,7 @@ class WelcomeControllerSpec extends ControllerSpecBase with ViewSpecBase:
     FakeDataCacheConnector.resetCaptures()
     FakeDataCacheConnector.save[String]("", VOAuthorisedId.toString, username)
     WelcomeController(
-      frontendAppConfig,
+      appConfig,
       dataRetrievalAction,
       DataRequiredActionImpl(ec),
       FakeNavigator(desiredRoute = onwardRoute),
@@ -51,7 +52,7 @@ class WelcomeControllerSpec extends ControllerSpecBase with ViewSpecBase:
   private def notLoggedInController(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap): WelcomeController =
     FakeDataCacheConnector.resetCaptures()
     WelcomeController(
-      frontendAppConfig,
+      appConfig,
       dataRetrievalAction,
       DataRequiredActionImpl(ec),
       FakeNavigator(desiredRoute = onwardRoute),
@@ -60,7 +61,7 @@ class WelcomeControllerSpec extends ControllerSpecBase with ViewSpecBase:
       welcome
     )(using ec)
 
-  private def viewAsString() = welcome(frontendAppConfig, username)(using getRequest, messages).toString
+  private def viewAsString() = welcome(appConfig, username)(using getRequest, messages).toString
 
   "WelcomeController" should {
     "return OK and the correct view for a GET" in {

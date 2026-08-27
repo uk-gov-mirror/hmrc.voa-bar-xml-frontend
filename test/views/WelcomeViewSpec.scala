@@ -27,9 +27,9 @@ class WelcomeViewSpec extends ViewBehaviours:
   private val username         = "BA0505"
   private val messageKeyPrefix = "welcome"
 
-  private val frontendAppConfig: AppConfig = inject[AppConfig]
+  private val appConfig: AppConfig = inject[AppConfig]
 
-  private def createView = () => welcome(frontendAppConfig, username)(using getRequest, messages)
+  private def createView = () => welcome(appConfig, username)(using getRequest, messages)
 
   "Welcome view" should {
     behave like normalPage(createView, messageKeyPrefix)
@@ -43,7 +43,7 @@ class WelcomeViewSpec extends ViewBehaviours:
 
   // Welcome page containing form for navigation
 
-  private def createFormView(formUser: String) = () => welcome(frontendAppConfig, formUser)(using getRequest, messages)
+  private def createFormView(formUser: String) = () => welcome(appConfig, formUser)(using getRequest, messages)
 
   def uploadLinkTest(ba: String, formDoc: Document): Unit =
     s"The upload link to the goToCouncilTaxUploadPage method for $ba" in {
