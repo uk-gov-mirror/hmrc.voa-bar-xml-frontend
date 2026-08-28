@@ -18,81 +18,81 @@ package journey
 
 import cats.data.Validated.{Invalid, Valid}
 import ltbs.uniform.ErrorTree
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.must
-import org.scalatest.EitherValues
+import uk.gov.hmrc.vo.unit.test.BaseSpec
 
-class UniformJourneySpec extends AnyFlatSpec with must.Matchers with EitherValues:
+class UniformJourneySpec extends BaseSpec:
 
   import UniformJourney.*
 
   private val string226Char: String = (1 to 22).map(_ => "1234567890").mkString("") + "123456"
   private val string227Char: String = string226Char + "7"
 
-  "UniformJourney" should "validate BAReport" in {
-    baReportValidation("1234") mustBe Valid("1234")
-    baReportValidation("1") mustBe Valid("1")
-    baReportValidation("123456789012") mustBe Valid("123456789012")
-    baReportValidation("") mustBe a[Invalid[?]]
-    baReportValidation("asdasd") mustBe a[Valid[?]]
-    baReportValidation("|") mustBe a[Invalid[?]]
-  }
+  "UniformJourney" should {
+    "validate BAReport" in {
+      baReportValidation("1234")         shouldBe Valid("1234")
+      baReportValidation("1")            shouldBe Valid("1")
+      baReportValidation("123456789012") shouldBe Valid("123456789012")
+      baReportValidation("")             shouldBe a[Invalid[?]]
+      baReportValidation("asdasd")       shouldBe a[Valid[?]]
+      baReportValidation("|")            shouldBe a[Invalid[?]]
+    }
 
-  it should "validate BA-ref" in {
-    baReferenceValidation("1234") mustBe Valid("1234")
-    baReferenceValidation("adasd#$^&*()") mustBe Valid("adasd#$^&*()")
-    baReferenceValidation("adasd#$^&*(%)") mustBe a[Valid[?]]
-    baReferenceValidation("|") mustBe a[Invalid[?]]
-  }
+    "validate BA-ref" in {
+      baReferenceValidation("1234")          shouldBe Valid("1234")
+      baReferenceValidation("adasd#$^&*()")  shouldBe Valid("adasd#$^&*()")
+      baReferenceValidation("adasd#$^&*(%)") shouldBe a[Valid[?]]
+      baReferenceValidation("|")             shouldBe a[Invalid[?]]
+    }
 
-  it should "validate UPRN" in {
-    uprnValidation(None) mustBe Valid(None)
-    uprnValidation(Some("1123")) mustBe Valid(Some("1123"))
-    uprnValidation(Some("123456789011")) mustBe Valid(Some("123456789011"))
-    uprnValidation(Some("1234567890013")) mustBe a[Invalid[?]]
-    uprnValidation(Some("")) mustBe a[Invalid[?]]
-  }
+    "validate UPRN" in {
+      uprnValidation(None)                  shouldBe Valid(None)
+      uprnValidation(Some("1123"))          shouldBe Valid(Some("1123"))
+      uprnValidation(Some("123456789011"))  shouldBe Valid(Some("123456789011"))
+      uprnValidation(Some("1234567890013")) shouldBe a[Invalid[?]]
+      uprnValidation(Some(""))              shouldBe a[Invalid[?]]
+    }
 
-  it should "validate Address" in {
-    val address = Address("99  Fosse Way %+", "ARDNAGOINE", None, Some("Fiction house"), "IV26 4YY")
-    UniformJourney.longAddressValidation("some-address")(address).toEither.value mustBe address
-  }
+    "validate Address" in {
+      val address = Address("99  Fosse Way %+", "ARDNAGOINE", None, Some("Fiction house"), "IV26 4YY")
+      UniformJourney.longAddressValidation("some-address")(address).toEither.value shouldBe address
+    }
 
-  it should "reject invalid address" in {
-    val address = Address("", "ARDNAGOINE", None, None, "HHGGD")
-    UniformJourney.longAddressValidation("some-address")(address).toEither.left.value mustBe a[ErrorTree]
-  }
+    "reject invalid address" in {
+      val address = Address("", "ARDNAGOINE", None, None, "HHGGD")
+      UniformJourney.longAddressValidation("some-address")(address).toEither.left.value shouldBe a[ErrorTree]
+    }
 
-  it should "validate short address with 35 characters" in {
-    val address = Address("12345678901234567890123456789012345", "ARDNAGOINE", None, Some("Fiction house"), "IV26 4YY")
-    UniformJourney.shortAddressValidation("some-address")(address).toEither.value mustBe address
-  }
+    "validate short address with 35 characters" in {
+      val address = Address("12345678901234567890123456789012345", "ARDNAGOINE", None, Some("Fiction house"), "IV26 4YY")
+      UniformJourney.shortAddressValidation("some-address")(address).toEither.value shouldBe address
+    }
 
-  it should "reject short address with more that 35 characters" in {
-    val address = Address("123456789012345678901234567890123456", "ARDNAGOINE", None, Some("Fiction house"), "IV26 4YY")
-    UniformJourney.shortAddressValidation("some-address")(address).toEither.left.value mustBe a[ErrorTree]
-  }
+    "reject short address with more that 35 characters" in {
+      val address = Address("123456789012345678901234567890123456", "ARDNAGOINE", None, Some("Fiction house"), "IV26 4YY")
+      UniformJourney.shortAddressValidation("some-address")(address).toEither.left.value shouldBe a[ErrorTree]
+    }
 
-  it should "Validate correct contact details" in {
-    val contactDetails = ContactDetails("First name", "lastName", None, None)
-    UniformJourney.propertyContactDetailValidator(contactDetails).toEither.value mustBe contactDetails
-  }
+    "Validate correct contact details" in {
+      val contactDetails = ContactDetails("First name", "lastName", None, None)
+      UniformJourney.propertyContactDetailValidator(contactDetails).toEither.value shouldBe contactDetails
+    }
 
-  it should "reject invalid contact details" in {
-    val contactDetails = ContactDetails("", "", Some("*&*&"), Some("*&(*&"))
-    UniformJourney.propertyContactDetailValidator(contactDetails).toEither.left.value mustBe a[ErrorTree]
-    UniformJourney.propertyContactDetailValidator(contactDetails).toEither.left.value must have size 4
-  }
+    "reject invalid contact details" in {
+      val contactDetails = ContactDetails("", "", Some("*&*&"), Some("*&(*&"))
+      UniformJourney.propertyContactDetailValidator(contactDetails).toEither.left.value shouldBe a[ErrorTree]
+      UniformJourney.propertyContactDetailValidator(contactDetails).toEither.left.value   should have size 4
+    }
 
-  it should "validate planning reference" in {
-    UniformJourney.planningRefValidator("1234asdf½").toEither.left.value mustBe a[ErrorTree]
-    UniformJourney.planningRefValidator("").toEither.left.value mustBe a[ErrorTree]
-    UniformJourney.planningRefValidator("12345678901234567890123456").toEither.left.value mustBe a[ErrorTree]
-    UniformJourney.planningRefValidator("€ \tŠ \tš \tŽ \tž \tŒ \tœ \tŸ").toEither.value mustBe "€ \tŠ \tš \tŽ \tž \tŒ \tœ \tŸ"
-  }
+    "validate planning reference" in {
+      UniformJourney.planningRefValidator("1234asdf½").toEither.left.value                  shouldBe a[ErrorTree]
+      UniformJourney.planningRefValidator("").toEither.left.value                           shouldBe a[ErrorTree]
+      UniformJourney.planningRefValidator("12345678901234567890123456").toEither.left.value shouldBe a[ErrorTree]
+      UniformJourney.planningRefValidator("€ \tŠ \tš \tŽ \tž \tŒ \tœ \tŸ").toEither.value   shouldBe "€ \tŠ \tš \tŽ \tž \tŒ \tœ \tŸ"
+    }
 
-  it should "validate comments" in {
-    UniformJourney.commentsValidation(Option(string226Char)).toEither.value mustBe Option(string226Char)
-    UniformJourney.commentsValidation(Option(string227Char)).toEither.left.value mustBe a[ErrorTree]
-    UniformJourney.commentsValidation(Option("€ \tŠ \tš \tŽ \tž \tŒ \tœ \tŸ")).toEither.value mustBe Some("€ \tŠ \tš \tŽ \tž \tŒ \tœ \tŸ")
+    "validate comments" in {
+      UniformJourney.commentsValidation(Option(string226Char)).toEither.value                   shouldBe Option(string226Char)
+      UniformJourney.commentsValidation(Option(string227Char)).toEither.left.value              shouldBe a[ErrorTree]
+      UniformJourney.commentsValidation(Option("€ \tŠ \tš \tŽ \tž \tŒ \tœ \tŸ")).toEither.value shouldBe Some("€ \tŠ \tš \tŽ \tž \tŒ \tœ \tŸ")
+    }
   }

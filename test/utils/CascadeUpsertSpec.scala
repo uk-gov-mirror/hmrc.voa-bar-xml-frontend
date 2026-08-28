@@ -17,47 +17,47 @@
 package utils
 
 import play.api.libs.json.*
-import base.SpecBase
 import models.CacheMap
+import uk.gov.hmrc.vo.unit.test.BaseAppSpec
 
-class CascadeUpsertSpec extends SpecBase:
+class CascadeUpsertSpec extends BaseAppSpec:
 
   "using the apply method for a key that has no special function" when {
-    "the key doesn't already exists" must {
+    "the key doesn't already exists" should {
       "add the key to the cache map" in {
         val originalCacheMap = CacheMap("id", Map())
         val cascadeUpsert    = CascadeUpsert()
         val result           = cascadeUpsert("key", "value", originalCacheMap)
-        result.data mustBe Map("key" -> JsString("value"))
+        result.data shouldBe Map("key" -> JsString("value"))
       }
     }
 
-    "data already exists for that key" must {
+    "data already exists for that key" should {
       "replace the value held against the key" in {
         val originalCacheMap = CacheMap("id", Map("key" -> JsString("original value")))
         val cascadeUpsert    = CascadeUpsert()
         val result           = cascadeUpsert("key", "new value", originalCacheMap)
-        result.data mustBe Map("key" -> JsString("new value"))
+        result.data shouldBe Map("key" -> JsString("new value"))
       }
     }
   }
 
   "addRepeatedValue" when {
-    "the key doesn't already exist" must {
+    "the key doesn't already exist" should {
       "add the key to the cache map and save the value in a sequence" in {
         val originalCacheMap = CacheMap("id", Map())
         val cascadeUpsert    = CascadeUpsert()
         val result           = cascadeUpsert.addRepeatedValue("key", "value", originalCacheMap)
-        result.data mustBe Map("key" -> Json.toJson(Seq("value")))
+        result.data shouldBe Map("key" -> Json.toJson(Seq("value")))
       }
     }
 
-    "the key already exists" must {
+    "the key already exists" should {
       "add the new value to the existing sequence" in {
         val originalCacheMap = CacheMap("id", Map("key" -> Json.toJson(Seq("value"))))
         val cascadeUpsert    = CascadeUpsert()
         val result           = cascadeUpsert.addRepeatedValue("key", "new value", originalCacheMap)
-        result.data mustBe Map("key" -> Json.toJson(Seq("value", "new value")))
+        result.data shouldBe Map("key" -> Json.toJson(Seq("value", "new value")))
       }
     }
   }

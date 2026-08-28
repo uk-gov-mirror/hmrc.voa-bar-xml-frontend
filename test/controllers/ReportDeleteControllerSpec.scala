@@ -20,31 +20,25 @@ import connectors.{FakeDataCacheConnector, ReportStatusConnector}
 import controllers.actions.DataRetrievalActionImpl
 import identifiers.LoginId
 import models.Login
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{when, withSettings}
+import org.mockito.Mockito.withSettings
 import org.mockito.quality.Strictness
-import org.scalatestplus.mockito.MockitoSugar
-import play.api.mvc.{BodyParsers, MessagesControllerComponents}
+import play.api.mvc.MessagesControllerComponents
 import play.api.test.Helpers.*
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, SessionKeys}
 
 import java.util.UUID
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class ReportDeleteControllerSpec extends ControllerSpecBase with MockitoSugar:
+class ReportDeleteControllerSpec extends ControllerSpecBase:
 
   private def controllerComponents = inject[MessagesControllerComponents]
-
-  private def bodyParser = inject[BodyParsers.Default]
 
   private def errorTemplateView = inject[views.html.error_template]
 
   private val login = Login("foo", "bar")
 
-  "ReportDeleteController" must {
+  "ReportDeleteController" should {
     "Delete report " in {
-
       val submissionId = UUID.randomUUID.toString
       FakeDataCacheConnector.resetCaptures()
       FakeDataCacheConnector.save[Login]("", LoginId.toString, login)
@@ -54,12 +48,12 @@ class ReportDeleteControllerSpec extends ControllerSpecBase with MockitoSugar:
         fakeReportStatusConnector(),
         controllerComponents,
         errorTemplateView,
-        DataRetrievalActionImpl(FakeDataCacheConnector, bodyParser)
+        DataRetrievalActionImpl(FakeDataCacheConnector, controllerComponents)
       )
-      val request    = fakeRequest.withFormUrlEncodedBody("submissionId" -> submissionId).withSession(SessionKeys.sessionId -> "")
+      val request    = postRequest.withFormUrlEncodedBody("submissionId" -> submissionId).withSession(SessionKeys.sessionId -> "")
       val response   = controller.onPageSubmit.apply(request)
 
-      status(response) mustBe 200
+      status(response) shouldBe 200
     }
   }
 

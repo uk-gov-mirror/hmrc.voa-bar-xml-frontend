@@ -24,14 +24,14 @@ class TimeOutControllerSpec extends ControllerSpecBase:
   private def controllerComponents = inject[MessagesControllerComponents]
   private def sessionTimeout       = inject[views.html.session_timeout]
 
-  "Timeout Controller" must {
+  "TimeoutController" should {
     "return 200 for a GET /this-service-has-been-reset" in {
-      val result = TimeoutController(controllerComponents, sessionTimeout).onPageLoad()(fakeRequest)
-      status(result) mustBe OK
+      val result = TimeoutController(controllerComponents, sessionTimeout).onPageLoad()(getRequest)
+      status(result) shouldBe OK
     }
 
     "return 303 for a GET /this-service-has-been-reset/redirect" in {
-      val result = TimeoutController(controllerComponents, sessionTimeout).timeout()(fakeRequest)
-      status(result) mustBe SEE_OTHER
+      val result = TimeoutController(controllerComponents, sessionTimeout).timeout()(getRequest)
+      status(result) shouldBe SEE_OTHER
     }
   }

@@ -16,10 +16,13 @@
 
 package utils
 
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
+import models.{CacheMap, Login}
 
-object DateFormatter:
-
-  def formatDate(dateTime: ZonedDateTime): String =
-    dateTime.format(DateTimeFormatter.ofPattern("dd MMMM yyyy 'at' kk:mm"))
+/**
+  * @author Yuriy Tumakha
+  */
+class FakeUserAnswers(
+  loginValue: Login,
+  cacheMap: CacheMap = CacheMap("", Map())
+) extends UserAnswers(cacheMap):
+  override def login: Option[Login] = Some(loginValue)

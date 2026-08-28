@@ -24,7 +24,6 @@ import play.api.mvc.MessagesControllerComponents
 import play.api.test.Helpers.*
 import utils.FakeNavigator
 import views.ViewSpecBase
-import scala.concurrent.ExecutionContext
 
 class TaskListControllerSpec extends ControllerSpecBase with ViewSpecBase:
 
@@ -33,7 +32,6 @@ class TaskListControllerSpec extends ControllerSpecBase with ViewSpecBase:
 
   private val username = "AUser"
 
-  private def ec                   = inject[ExecutionContext]
   private def controllerComponents = inject[MessagesControllerComponents]
 
   private def onwardRoute = routes.LoginController.onPageLoad(NormalMode)
@@ -53,7 +51,7 @@ class TaskListControllerSpec extends ControllerSpecBase with ViewSpecBase:
   private def notLoggedInController(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap) =
     FakeDataCacheConnector.resetCaptures()
     WelcomeController(
-      frontendAppConfig,
+      appConfig,
       dataRetrievalAction,
       DataRequiredActionImpl(ec),
       FakeNavigator(desiredRoute = onwardRoute),
@@ -62,32 +60,30 @@ class TaskListControllerSpec extends ControllerSpecBase with ViewSpecBase:
       welcome
     )(using ec)
 
-  private def viewAsString() = taskList()(using fakeRequest, messages).toString
+  private def viewAsString() = taskList()(using getRequest, messages).toString
 
-  "Logging Controller" must {
-
+  "Logging Controller" should {
     "return OK and the correct view for a GET" in {
-      val result = loggedInController().onPageLoad()(fakeRequest)
+      val result = loggedInController().onPageLoad()(getRequest)
 
-      status(result) mustBe OK
-      contentAsString(result) mustBe viewAsString()
+      status(result)          shouldBe OK
+      contentAsString(result) shouldBe viewAsString()
     }
 
-    "if not authorized by VO must go to the login page" in {
-      val result = notLoggedInController().onPageLoad()(fakeRequest)
+    "if not authorized by VO should go to the login page" in {
+      val result = notLoggedInController().onPageLoad()(getRequest)
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(onwardRoute.url)
+      status(result)           shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(onwardRoute.url)
     }
 
     "return a redirect when calling goToAddPropertyPage" in {
-      val result = loggedInController().goToAddPropertyPage()(fakeRequest)
-      status(result) mustBe SEE_OTHER
+      val result = loggedInController().goToAddPropertyPage()(getRequest)
+      status(result) shouldBe SEE_OTHER
     }
 
     "return a redirect when calling goToCheckYourAnswersPage" in {
-      val result = loggedInController().goToCheckYourAnswersPage()(fakeRequest)
-      status(result) mustBe SEE_OTHER
+      val result = loggedInController().goToCheckYourAnswersPage()(getRequest)
+      status(result) shouldBe SEE_OTHER
     }
-
   }

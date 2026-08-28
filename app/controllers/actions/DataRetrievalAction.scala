@@ -28,7 +28,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class DataRetrievalActionImpl @Inject() (
   val dataCacheConnector: DataCacheConnector,
-  bodyParsers: BodyParsers.Default
+  cc: ControllerComponents
 )(using val executionContext: ExecutionContext
 ) extends DataRetrievalAction:
 
@@ -43,7 +43,7 @@ class DataRetrievalActionImpl @Inject() (
           case Some(data) => OptionalDataRequest(request, sessionId.toString, Some(UserAnswers(data)))
         }
 
-  override def parser: BodyParser[AnyContent] = bodyParsers
+  override def parser: BodyParser[AnyContent] = cc.parsers.default
 
 @ImplementedBy(classOf[DataRetrievalActionImpl])
 trait DataRetrievalAction extends ActionTransformer[Request, OptionalDataRequest] with ActionBuilder[OptionalDataRequest, AnyContent]

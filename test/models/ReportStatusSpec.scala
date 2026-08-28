@@ -16,28 +16,27 @@
 
 package models
 
-import org.scalatestplus.play.PlaySpec
+import uk.gov.hmrc.vo.unit.test.BaseSpec
 
-class ReportStatusSpec extends PlaySpec:
+class ReportStatusSpec extends BaseSpec:
 
   private val baCode                        = "ba1221"
   private val submissionId                  = "sId999"
   private val reportStatusError: Seq[Error] = Seq(Error("BAD-CHAR"))
 
-  "ReportStatus model" must {
-
-    "Produce a ReportStatus model with no errors" in {
+  "ReportStatus model" should {
+    "produce a ReportStatus model with no errors" in {
       val result = ReportStatus(submissionId, baCode = Some(baCode), status = Some("SUBMITTED"))
-      result.baCode mustBe Some(baCode)
-      result.id mustBe submissionId
-      result.status mustBe Some("SUBMITTED")
+      result.baCode shouldBe Some(baCode)
+      result.id     shouldBe submissionId
+      result.status shouldBe Some("SUBMITTED")
     }
 
-    "Produce a ReportStatus model with errors" in {
+    "produce a ReportStatus model with errors" in {
       val result = ReportStatus(submissionId, baCode = Some(baCode), status = Some("INVALIDATED"), errors = reportStatusError)
-      result.baCode mustBe Some(baCode)
-      result.id mustBe submissionId
-      result.status mustBe Some("INVALIDATED")
-      result.errors mustBe reportStatusError
+      result.baCode shouldBe Some(baCode)
+      result.id     shouldBe submissionId
+      result.status shouldBe Some("INVALIDATED")
+      result.errors shouldBe reportStatusError
     }
   }

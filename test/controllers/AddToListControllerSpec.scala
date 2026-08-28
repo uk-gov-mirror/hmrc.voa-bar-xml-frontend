@@ -27,13 +27,12 @@ import play.api.test.Helpers.*
 import play.filters.csrf.CSRF.{Token, TokenInfo}
 import utils.FakeNavigator
 import views.ViewSpecBase
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class AddToListControllerSpec extends ControllerSpecBase with ViewSpecBase:
 
   private val username = "AUser"
 
-  private def ec                   = inject[ExecutionContext]
   private def controllerComponents = inject[MessagesControllerComponents]
 
   private def addToList = inject[views.html.add_to_list]
@@ -77,15 +76,14 @@ class AddToListControllerSpec extends ControllerSpecBase with ViewSpecBase:
     )(using ec)
 
   private def viewAsString(submission: Cr05SubmissionBuilder): String =
-    addToList(Some(username), submission, models.YesNoForm.yesNoForm)(using fakeRequest, messages).toString
+    addToList(Some(username), submission, models.YesNoForm.yesNoForm)(using getRequest, messages).toString
 
-  private def formfakeRequest(formResponse: String) =
-    val csfrToken = Token("csrfToken", "FixedCSRFTOkenValueForTest")
+  private def formFakeRequest(formResponse: String) =
+    val csrfToken = Token("csrfToken", "FixedCSRFTOkenValueForTest")
     val req       = FakeRequest("POST", "").withFormUrlEncodedBody("add-another" -> formResponse)
-    req.withAttrs(req.attrs.updated(Token.InfoAttr -> TokenInfo(csfrToken)))
+    req.withAttrs(req.attrs.updated(Token.InfoAttr -> TokenInfo(csrfToken)))
 
-  "AddToListController" must {
-
+  "AddToListController" should {
     "return OK and the correct view for a GET for submission with 1 split property" in {
       val addProperty               = Cr05AddProperty(
         None,
@@ -95,10 +93,10 @@ class AddToListControllerSpec extends ControllerSpecBase with ViewSpecBase:
         Option(Address("line1", "line2", Option("line3"), Option("line 4"), "BN12 4AX"))
       )
       val propertyToSplitSubmission = Cr05SubmissionBuilder(None, List(), List(addProperty), None)
-      val result: Future[Result]    = loggedInControllerWithSubmission(propertyToSplitSubmission).onPageLoad(fakeRequest)
+      val result: Future[Result]    = loggedInControllerWithSubmission(propertyToSplitSubmission).onPageLoad(getRequest)
 
-      status(result) mustBe OK
-      contentAsString(result) mustBe viewAsString(propertyToSplitSubmission)
+      status(result)          shouldBe OK
+      contentAsString(result) shouldBe viewAsString(propertyToSplitSubmission)
     }
 
     "return OK and the correct view for a GET for submission with 2 split property" in {
@@ -110,29 +108,28 @@ class AddToListControllerSpec extends ControllerSpecBase with ViewSpecBase:
         Option(Address("line1", "line2", Option("line3"), Option("line 4"), "BN12 4AX"))
       )
       val propertyToSplitSubmission = Cr05SubmissionBuilder(None, List(), List(addProperty, addProperty), None)
-      val result: Future[Result]    = loggedInControllerWithSubmission(propertyToSplitSubmission).onPageLoad(fakeRequest)
+      val result: Future[Result]    = loggedInControllerWithSubmission(propertyToSplitSubmission).onPageLoad(getRequest)
 
-      status(result) mustBe OK
-      contentAsString(result) mustBe viewAsString(propertyToSplitSubmission)
+      status(result)          shouldBe OK
+      contentAsString(result) shouldBe viewAsString(propertyToSplitSubmission)
     }
 
     "go to Add Property Page on POST with yes " in {
-      val result: Future[Result] = loggedInController().addProperty(formfakeRequest("true"))
+      val result: Future[Result] = loggedInController().addProperty(formFakeRequest("true"))
 
-      status(result) mustBe SEE_OTHER
+      status(result) shouldBe SEE_OTHER
     }
 
     "go to Add Property Page on POST with no " in {
-      val result: Future[Result] = loggedInController().addProperty(formfakeRequest("false"))
+      val result: Future[Result] = loggedInController().addProperty(formFakeRequest("false"))
 
-      status(result) mustBe SEE_OTHER
+      status(result) shouldBe SEE_OTHER
     }
 
-    "if not authorized by VO must go to the login page" in {
-      val result = notLoggedInController().onPageLoad()(fakeRequest)
+    "if not authorized by VO should go to the login page" in {
+      val result = notLoggedInController().onPageLoad()(getRequest)
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(onwardRoute.url)
+      status(result)           shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(onwardRoute.url)
     }
-
   }

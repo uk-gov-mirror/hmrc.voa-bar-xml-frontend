@@ -24,7 +24,7 @@ object Formats:
     new Format[Map[List[String], String]]:
       override def writes(o: Map[List[String], String]): JsValue =
         val data = o.map { case (key, value) =>
-          (key.mkString("."), JsString(value)) // Todo, maybe better delimiter
+          (key.mkString("."), JsString(value))
         }
         JsObject(data)
 

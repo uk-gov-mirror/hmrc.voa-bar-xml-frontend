@@ -29,12 +29,11 @@ class SubmissionPanelSpec extends ViewBehaviours:
 
   private def submission1 = () => submission_panel(reportStatus1, GovukSummaryList())(using messages)
 
-  "Submission Panel" must {
-
+  "Submission Panel" should {
     "Contain a submission ID equal to 'submissionId'" in {
       val doc    = asDocument(submission1())
       val status = doc.select(s"#summary-list-${reportStatus1.id.split("-").head} > div:nth-child(1) > dd").text
-      status mustBe submissionId
+      status shouldBe submissionId
     }
 
   }

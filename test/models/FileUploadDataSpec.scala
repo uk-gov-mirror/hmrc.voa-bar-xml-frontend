@@ -16,14 +16,14 @@
 
 package models
 
-import base.SpecBase
+import uk.gov.hmrc.vo.unit.test.BaseSpec
 
-class FileUploadDataSpec extends SpecBase:
+class FileUploadDataSpec extends BaseSpec:
 
   val xml = """<head><body>Some data</body></head>"""
 
   "Given an xml string create a FileUploadData model" in {
     val result = FileUploadData(xml)
 
-    result.xml mustBe xml
+    result.xml shouldBe xml
   }

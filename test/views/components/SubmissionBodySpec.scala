@@ -28,8 +28,7 @@ class SubmissionBodySpec extends ViewBehaviours:
 
   private def submission = () => submission_body(reportStatus)(using messages)
 
-  "Submission Body " must {
-
+  "Submission Body" should {
     "Contain the following keys" in {
       val doc = asDocument(submission())
 

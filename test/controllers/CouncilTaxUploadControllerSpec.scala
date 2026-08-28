@@ -22,10 +22,6 @@ import identifiers.{LoginId, VOAuthorisedId}
 import models.*
 import models.UpScanRequests.{InitiateRequest, InitiateResponse, UploadRequest}
 import org.apache.pekko.actor.ActorSystem
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
-import org.scalatestplus.mockito.MockitoSugar
-import play.api.Configuration
 import play.api.data.Form
 import play.api.libs.json.Json
 import play.api.mvc.MessagesControllerComponents
@@ -34,11 +30,10 @@ import play.api.test.Helpers.*
 import uk.gov.hmrc.http.HeaderCarrier
 import views.ViewSpecBase
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.io.Source
 
-class CouncilTaxUploadControllerSpec extends ControllerSpecBase with ViewSpecBase with MockitoSugar:
+class CouncilTaxUploadControllerSpec extends ControllerSpecBase with ViewSpecBase:
 
   private def onwardRoute = routes.LoginController.onPageLoad(NormalMode)
 
@@ -46,8 +41,6 @@ class CouncilTaxUploadControllerSpec extends ControllerSpecBase with ViewSpecBas
 
   private def councilTaxUpload = inject[views.html.councilTaxUpload]
   private def errorTemplate    = inject[views.html.error_template]
-
-  private def configuration = inject[Configuration]
 
   private val formProvider                      = FileUploadDataFormProvider()
   private val form                              = formProvider()
@@ -155,34 +148,33 @@ class CouncilTaxUploadControllerSpec extends ControllerSpecBase with ViewSpecBas
       controllerComponents
     )
 
-  private def viewAsString(form: Form[?] = form) = councilTaxUpload(username, form, Some(initiateResponse))(using fakeRequest, messages).toString
+  private def viewAsString(form: Form[?] = form) = councilTaxUpload(username, form, Some(initiateResponse))(using getRequest, messages).toString
 
-  "CouncilTaxUpload Controller" must {
-
+  "CouncilTaxUpload Controller" should {
     "return OK and the correct view for a GET" in {
-      val result = loggedInController(uploadConnector).onPageLoad(false)(fakeRequest)
+      val result = loggedInController(uploadConnector).onPageLoad(false)(getRequest)
 
-      status(result) mustBe OK
-      contentAsString(result) mustBe viewAsString()
+      status(result)          shouldBe OK
+      contentAsString(result) shouldBe viewAsString()
     }
 
-    "if not authorized by VO must go to the login page" in {
-      val result = notLoggedInController(uploadConnector).onPageLoad(false)(fakeRequest)
+    "if not authorized by VO should go to the login page" in {
+      val result = notLoggedInController(uploadConnector).onPageLoad(false)(getRequest)
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(onwardRoute.url)
+      status(result)           shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(onwardRoute.url)
     }
 
     "return NoContent when preparing the file upload" in {
-      val result = loggedInController(uploadConnector).onPrepareUpload(submissionId)(fakeRequest)
+      val result = loggedInController(uploadConnector).onPrepareUpload(submissionId)(getRequest)
 
-      status(result) mustBe NO_CONTENT
+      status(result) shouldBe NO_CONTENT
     }
 
     "return invalid response when preparing for file upload fails" in {
-      val result = loggedInController(uploadConnector, reportStatusConnector = reportStatusConnectorFailMock).onPrepareUpload(submissionId)(fakeRequest)
+      val result = loggedInController(uploadConnector, reportStatusConnector = reportStatusConnectorFailMock).onPrepareUpload(submissionId)(getRequest)
 
-      status(result) mustBe INTERNAL_SERVER_ERROR
+      status(result) shouldBe INTERNAL_SERVER_ERROR
     }
 
     "return valid response when saving upload error status" in {
@@ -193,7 +185,7 @@ class CouncilTaxUploadControllerSpec extends ControllerSpecBase with ViewSpecBas
 
       val result = call(loggedInController(uploadConnector).onError(submissionId), request)
 
-      status(result) mustBe NO_CONTENT
+      status(result) shouldBe NO_CONTENT
     }
 
     "return invalid response when saving upload error status fails" in {
@@ -211,7 +203,6 @@ class CouncilTaxUploadControllerSpec extends ControllerSpecBase with ViewSpecBas
         request
       )
 
-      status(result) mustBe INTERNAL_SERVER_ERROR
+      status(result) shouldBe INTERNAL_SERVER_ERROR
     }
-
   }

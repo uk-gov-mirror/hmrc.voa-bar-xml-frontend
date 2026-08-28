@@ -24,6 +24,7 @@ import play.api.mvc.MessagesControllerComponents
 import play.api.test.Helpers.*
 import utils.FakeNavigator
 import views.ViewSpecBase
+
 import scala.concurrent.ExecutionContext
 
 class WelcomeControllerSpec extends ControllerSpecBase with ViewSpecBase:
@@ -39,7 +40,7 @@ class WelcomeControllerSpec extends ControllerSpecBase with ViewSpecBase:
     FakeDataCacheConnector.resetCaptures()
     FakeDataCacheConnector.save[String]("", VOAuthorisedId.toString, username)
     WelcomeController(
-      frontendAppConfig,
+      appConfig,
       dataRetrievalAction,
       DataRequiredActionImpl(ec),
       FakeNavigator(desiredRoute = onwardRoute),
@@ -51,7 +52,7 @@ class WelcomeControllerSpec extends ControllerSpecBase with ViewSpecBase:
   private def notLoggedInController(dataRetrievalAction: DataRetrievalAction = getEmptyCacheMap): WelcomeController =
     FakeDataCacheConnector.resetCaptures()
     WelcomeController(
-      frontendAppConfig,
+      appConfig,
       dataRetrievalAction,
       DataRequiredActionImpl(ec),
       FakeNavigator(desiredRoute = onwardRoute),
@@ -60,31 +61,30 @@ class WelcomeControllerSpec extends ControllerSpecBase with ViewSpecBase:
       welcome
     )(using ec)
 
-  private def viewAsString() = welcome(frontendAppConfig, username)(using fakeRequest, messages).toString
+  private def viewAsString() = welcome(appConfig, username)(using getRequest, messages).toString
 
-  "Welcome Controller" must {
-
+  "WelcomeController" should {
     "return OK and the correct view for a GET" in {
-      val result = loggedInController().onPageLoad(fakeRequest)
+      val result = loggedInController().onPageLoad(getRequest)
 
-      status(result) mustBe OK
-      contentAsString(result) mustBe viewAsString()
+      status(result)          shouldBe OK
+      contentAsString(result) shouldBe viewAsString()
     }
 
-    "if not authorized by VO must go to the login page" in {
-      val result = notLoggedInController().onPageLoad()(fakeRequest)
+    "if not authorized by VO should go to the login page" in {
+      val result = notLoggedInController().onPageLoad()(getRequest)
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(onwardRoute.url)
+      status(result)           shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(onwardRoute.url)
     }
 
     "return a redirect when calling goToCouncilTaxUploadPage" in {
-      val result = loggedInController().goToCouncilTaxUploadPage()(fakeRequest)
-      status(result) mustBe SEE_OTHER
+      val result = loggedInController().goToCouncilTaxUploadPage()(getRequest)
+      status(result) shouldBe SEE_OTHER
     }
 
     "return a redirect when calling goToTaskListLoadPage" in {
-      val result = loggedInController().goToTaskListLoadPage()(fakeRequest)
-      status(result) mustBe SEE_OTHER
+      val result = loggedInController().goToTaskListLoadPage()(getRequest)
+      status(result) shouldBe SEE_OTHER
     }
   }

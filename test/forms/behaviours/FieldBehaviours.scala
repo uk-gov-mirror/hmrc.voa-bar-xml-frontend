@@ -19,17 +19,16 @@ package forms.behaviours
 import forms.FormSpec
 import generators.Generators
 import org.scalacheck.Gen
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.data.{Form, FormError}
 
-trait FieldBehaviours extends FormSpec with ScalaCheckDrivenPropertyChecks with Generators:
+trait FieldBehaviours extends FormSpec with Generators:
 
   def fieldThatBindsValidData(form: Form[?], fieldName: String, validDataGenerator: Gen[String]): Unit =
     "bind valid data" in
       forAll(validDataGenerator -> "validDataItem") {
         dataItem =>
           val result = form.bind(Map(fieldName -> dataItem)).apply(fieldName)
-          result.value.value shouldBe dataItem
+          result.value.get shouldBe dataItem
       }
 
   def mandatoryField(form: Form[?], fieldName: String, requiredError: FormError): Unit =

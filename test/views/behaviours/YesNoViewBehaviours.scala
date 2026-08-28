@@ -23,12 +23,12 @@ trait YesNoViewBehaviours extends QuestionViewBehaviours[Boolean]:
 
   def yesNoPage(createView: Form[Boolean] => HtmlFormat.Appendable, messageKeyPrefix: String): Unit =
     "behave like a page with a Yes/No question" when {
-      "rendered" must {
+      "rendered" should {
         "contain a legend for the question" in {
           val doc     = asDocument(createView(form))
           val legends = doc.getElementsByTag("legend")
-          legends.size mustBe 1
-          legends.first.text mustBe messages(s"$messageKeyPrefix.heading")
+          legends.size       shouldBe 1
+          legends.first.text shouldBe messages(s"$messageKeyPrefix.heading")
         }
 
         "contain an input for the value" in {
@@ -49,15 +49,15 @@ trait YesNoViewBehaviours extends QuestionViewBehaviours[Boolean]:
         }
       }
 
-      "rendered with a value of true" must {
+      "rendered with a value of true" should {
         behave like answeredYesNoPage(createView, true)
       }
 
-      "rendered with a value of false" must {
+      "rendered with a value of false" should {
         behave like answeredYesNoPage(createView, false)
       }
 
-      "rendered with an error" must {
+      "rendered with an error" should {
         "show an error summary" in {
           val doc = asDocument(createView(form.withError(error)))
           assertRenderedById(doc, "error-summary-heading")
@@ -66,7 +66,7 @@ trait YesNoViewBehaviours extends QuestionViewBehaviours[Boolean]:
         "show an error in the value field's label" in {
           val doc       = asDocument(createView(form.withError(error)))
           val errorSpan = doc.getElementsByClass("error-notification").first
-          errorSpan.text mustBe messages(errorMessage)
+          errorSpan.text shouldBe messages(errorMessage)
         }
       }
     }

@@ -5,7 +5,7 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 
 val appName = "voa-bar-xml-frontend"
 
-ThisBuild / scalaVersion := "3.8.3"
+ThisBuild / scalaVersion := "3.8.4"
 ThisBuild / majorVersion := 1
 ThisBuild / semanticdbEnabled := true
 
@@ -21,7 +21,7 @@ lazy val microservice = Project(appName, file("."))
     javaOptions += "-XX:+EnableDynamicAgentLoading",
     RoutesKeys.routesImport ++= Seq("models._"),
     PlayKeys.playDefaultPort := 8448,
-    libraryDependencies ++= Dependencies.appDependencies
+    libraryDependencies ++= AppDependencies.appDependencies
   )
   .settings(
     SassKeys.cssStyle := Minified,

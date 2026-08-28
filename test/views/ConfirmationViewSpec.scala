@@ -44,22 +44,21 @@ class ConfirmationViewSpec extends ViewBehaviours:
 
   private val doc: Document = asDocument(createView())
 
-  "Confirmation view" must {
+  "Confirmation view" should {
     behave like normalPage(createViewWithStatus, messageKeyPrefix, "submission.details")
 
     "Include an username element displaying the BA name based on given BA Code" in {
       val user = doc.select("#account-info-header > li:nth-child(2) > span:nth-child(2)").text
-      user mustBe "Bristol"
+      user shouldBe "Bristol"
     }
 
-    "Include a signout link which redirects the users to the signout page" in {
+    "Include a sign out link which redirects the users to the sign out page" in {
       val href = doc.getElementsByClass("hmrc-sign-out-nav__link").first.attr("href")
-      href mustBe controllers.routes.SignOutController.signOut.url
+      href shouldBe controllers.routes.SignOutController.signOut.url
     }
 
     "Include a print link when completed" in {
       val downloadButton = asDocument(createViewWithStatus()).getElementById("print-button").text
-      downloadButton mustBe messages("report.link.print")
+      downloadButton shouldBe messages("report.link.print")
     }
-
   }

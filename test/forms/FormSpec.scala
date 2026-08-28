@@ -16,12 +16,11 @@
 
 package forms
 
-import org.scalatest.matchers.should
-import org.scalatest.wordspec.AnyWordSpec
-import org.scalatest.{Assertion, OptionValues}
+import org.scalatest.Assertion
 import play.api.data.{Form, FormError}
+import uk.gov.hmrc.vo.unit.test.BaseSpec
 
-trait FormSpec extends AnyWordSpec with OptionValues with should.Matchers:
+trait FormSpec extends BaseSpec:
 
   val emptyFormData: Map[String, String] = Map[String, String]()
 

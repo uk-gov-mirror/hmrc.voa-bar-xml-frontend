@@ -16,24 +16,16 @@
 
 package connectors
 
-import base.SpecBase
 import models.*
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.{Json, Writes}
 import play.api.test.Helpers.*
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.vo.unit.test.BaseAppSpec
 
-import java.net.URL
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import scala.concurrent.ExecutionContext
-import scala.concurrent.ExecutionContext.Implicits.global
 
-class ReportStatusConnectorSpec extends SpecBase with MockitoSugar:
+class ReportStatusConnectorSpec extends BaseAppSpec:
 
   private val userId       = "ba1221"
   private val submissionId = "1234-XX"
@@ -49,116 +41,83 @@ class ReportStatusConnectorSpec extends SpecBase with MockitoSugar:
   private val login          = Login("AUser", "anyPass")
   private val servicesConfig = inject[ServicesConfig]
 
-  private val httpMock = mock[HttpClientV2]
-  when(
-    httpMock.get(any[URL])(using any[HeaderCarrier])
-  ).thenReturn(RequestBuilderStub(Right(OK), Json.toJson(Seq(rs)).toString))
-  when(
-    httpMock.put(any[URL])(using any[HeaderCarrier])
-  ).thenReturn(RequestBuilderStub(Right(OK), "{}"))
-
-  private val httpFailMock = mock[HttpClientV2]
-  when(
-    httpFailMock.get(any[URL])(using any[HeaderCarrier])
-  ).thenReturn(RequestBuilderStub(Left(exception)))
-  when(
-    httpFailMock.put(any[URL])(using any[HeaderCarrier])
-  ).thenReturn(RequestBuilderStub(Left(exception)))
-
-  "Report status connector spec" must {
+  "Report status connector spec" should {
     "given an username that was authorised by the VO - request the currently known report statuses from voa-bar" in {
-      given HeaderCarrier = HeaderCarrier()
-      val connector       = DefaultReportStatusConnector(httpMock, servicesConfig)
-      val login           = Login("AUser", "anyPass")
+      val connector = DefaultReportStatusConnector(httpClientMock(responseBody = Json.toJson(Seq(rs))), servicesConfig)
+      val login     = Login("AUser", "anyPass")
 
-      val result = await(connector.get(login))
+      val result = connector.get(login).futureValue
       result match
-        case Right(reportStatuses) => reportStatuses mustBe Seq(rs)
+        case Right(reportStatuses) => reportStatuses shouldBe Seq(rs)
         case Left(_)               => assert(false)
     }
 
     "return a failure when the repository encounters an issue" in {
-      given HeaderCarrier = HeaderCarrier()
-      val connector       = DefaultReportStatusConnector(httpFailMock, servicesConfig)
+      val connector = DefaultReportStatusConnector(httpClientFailedMock(returnFailure = exception), servicesConfig)
 
-      val result = await(connector.get(login))
+      val result = connector.get(login).futureValue
       assert(result.isLeft)
     }
 
     "returns a valid result when saving a new report" in {
-      given HeaderCarrier = HeaderCarrier()
-      val connector       = DefaultReportStatusConnector(httpMock, servicesConfig)
+      val connector = DefaultReportStatusConnector(httpClientMock(PUT, responseBody = "{}"), servicesConfig)
 
-      val result = await(connector.saveUserInfo(submissionId, login))
+      val result = connector.saveUserInfo(submissionId, login).futureValue
       assert(result.isRight)
     }
 
     "returns an error when saving a new report" in {
-      given HeaderCarrier = HeaderCarrier()
-      val connector       = DefaultReportStatusConnector(httpFailMock, servicesConfig)
+      val connector = DefaultReportStatusConnector(httpClientFailedMock(PUT, returnFailure = exception), servicesConfig)
 
-      val result = await(connector.saveUserInfo(submissionId, login))
+      val result = connector.saveUserInfo(submissionId, login).futureValue
       assert(result.isLeft)
     }
 
     "returns a valid result when saving a report" in {
-      given HeaderCarrier = HeaderCarrier()
-      val connector       = DefaultReportStatusConnector(httpMock, servicesConfig)
+      val connector = DefaultReportStatusConnector(httpClientMock(PUT, responseBody = "{}"), servicesConfig)
 
-      val result = await(connector.save(rs, login))
+      val result = connector.save(rs, login).futureValue
       assert(result.isRight)
     }
 
     "returns an error when saving a report" in {
-      given HeaderCarrier = HeaderCarrier()
-      val connector       = DefaultReportStatusConnector(httpFailMock, servicesConfig)
+      val connector = DefaultReportStatusConnector(httpClientFailedMock(PUT, returnFailure = exception), servicesConfig)
 
-      val result = await(connector.save(rs, login))
+      val result = connector.save(rs, login).futureValue
       assert(result.isLeft)
     }
 
-    "given submission id get reportstatus" in {
-      given HeaderCarrier = HeaderCarrier()
-
-      val httpClientV2Mock = mock[HttpClientV2]
-      when(
-        httpClientV2Mock.get(any[URL])(using any[HeaderCarrier])
-      ).thenReturn(RequestBuilderStub(Right(OK), Json.toJson(rs).toString))
-
-      val connector = DefaultReportStatusConnector(httpClientV2Mock, servicesConfig)
+    "given submission id get report status" in {
+      val connector = DefaultReportStatusConnector(httpClientMock(responseBody = Json.toJson(rs)), servicesConfig)
       val login     = Login("AUser", "anyPass")
 
-      val result = await(connector.getByReference(submissionId, login))
+      val result = connector.getByReference(submissionId, login).futureValue
       result match
-        case Right(reportStatuses) => reportStatuses mustBe rs
+        case Right(reportStatuses) => reportStatuses shouldBe rs
         case Left(_)               => assert(false)
     }
 
     "return a failure when the repository encounters an issue while retrieving submission" in {
-      given HeaderCarrier = HeaderCarrier()
-      val connector       = DefaultReportStatusConnector(httpFailMock, servicesConfig)
+      val connector = DefaultReportStatusConnector(httpClientFailedMock(returnFailure = exception), servicesConfig)
 
-      val result = await(connector.getByReference(submissionId, login))
+      val result = connector.getByReference(submissionId, login).futureValue
       assert(result.isLeft)
     }
 
-    "get all reportstatus" in {
-      given HeaderCarrier = HeaderCarrier()
-
-      val connector = DefaultReportStatusConnector(httpMock, servicesConfig)
+    "get all report statuses" in {
+      val connector = DefaultReportStatusConnector(httpClientMock(responseBody = Json.toJson(Seq(rs))), servicesConfig)
       val login     = Login("AUser", "anyPass")
 
-      val result = await(connector.getAll(login))
+      val result = connector.getAll(login).futureValue
       result match
-        case Right(reportStatuses) => reportStatuses mustBe Seq(rs)
+        case Right(reportStatuses) => reportStatuses shouldBe Seq(rs)
         case Left(_)               => assert(false)
     }
 
     "return a failure when the repository encounters an issue while retrieving all submission" in {
-      given HeaderCarrier = HeaderCarrier()
-      val connector       = DefaultReportStatusConnector(httpFailMock, servicesConfig)
+      val connector = DefaultReportStatusConnector(httpClientFailedMock(returnFailure = exception), servicesConfig)
 
-      val result = await(connector.getAll(login))
+      val result = connector.getAll(login).futureValue
       assert(result.isLeft)
     }
   }

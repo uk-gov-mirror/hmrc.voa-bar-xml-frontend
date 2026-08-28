@@ -23,12 +23,12 @@ trait ViewBehaviours extends ViewSpecBase:
 
   def normalPage(view: () => HtmlFormat.Appendable, messageKeyPrefix: String, expectedGuidanceKeys: String*): Unit =
     "behave like a normal page" when {
-      "rendered" must {
+      "rendered" should {
         "have the correct banner title" in {
           val doc  = asDocument(view())
           val nav  = doc.getElementsByClass("govuk-service-navigation__service-name").get(0)
           val span = nav.children.first
-          span.text mustBe messagesApi("service.name")
+          span.text shouldBe messagesApi("service.name")
         }
 
         "display the correct browser title" in {
@@ -54,7 +54,7 @@ trait ViewBehaviours extends ViewSpecBase:
     }
 
   def pageWithBackLink(view: () => HtmlFormat.Appendable): Unit =
-    "behave like a page with a back link" must {
+    "behave like a page with a back link" should {
       "have a back link" in {
         val doc = asDocument(view())
         assertRenderedById(doc, "back-link")

@@ -23,9 +23,9 @@ class SignOutControllerSpec extends ControllerSpecBase:
 
   private def controllerComponents = inject[MessagesControllerComponents]
 
-  "SignOut Controller" must {
+  "SignOut Controller" should {
     "return 303 for a GET" in {
-      val result = SignOutController(controllerComponents).signOut()(fakeRequest)
-      status(result) mustBe SEE_OTHER
+      val result = SignOutController(controllerComponents).signOut()(getRequest)
+      status(result) shouldBe SEE_OTHER
     }
   }

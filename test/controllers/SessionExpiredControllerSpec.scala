@@ -25,14 +25,14 @@ class SessionExpiredControllerSpec extends ControllerSpecBase:
   private def controllerComponents = inject[MessagesControllerComponents]
   private val session_expired      = inject[session_expired]
 
-  "SessionExpired Controller" must {
+  "SessionExpired Controller" should {
     "return 200 for a GET" in {
-      val result = SessionExpiredController(controllerComponents, session_expired).onPageLoad()(fakeRequest)
-      status(result) mustBe OK
+      val result = SessionExpiredController(controllerComponents, session_expired).onPageLoad()(getRequest)
+      status(result) shouldBe OK
     }
 
     "return the correct view for a GET" in {
-      val result = SessionExpiredController(controllerComponents, session_expired).onPageLoad()(fakeRequest)
-      contentAsString(result) mustBe session_expired()(using fakeRequest, messages).toString
+      val result = SessionExpiredController(controllerComponents, session_expired).onPageLoad()(getRequest)
+      contentAsString(result) shouldBe session_expired()(using getRequest, messages).toString
     }
   }
